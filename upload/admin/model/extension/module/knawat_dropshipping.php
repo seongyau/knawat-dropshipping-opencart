@@ -278,7 +278,7 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
 
                     $option_id = $this->get_option_id_by_name( $key );
                     if( !$option_id ){
-                        $option_id = $this->create_option( $attribute['names'] );
+                        $option_id = $this->create_option( $attribute['name'] );
                     }
 
                     if( !$option_id ){
