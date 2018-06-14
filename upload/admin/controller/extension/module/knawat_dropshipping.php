@@ -4,7 +4,12 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 	private $error = array();
 	private $route = 'extension/module/knawat_dropshipping';
 
+	public function __construct($registry) {
+		parent::__construct($registry);
+	}
+	
 	public function index() {
+
 		$this->load->language( $this->route );
 		$this->document->setTitle($this->language->get('heading_title'));
 

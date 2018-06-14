@@ -1,12 +1,12 @@
 <?php
 class ModelExtensionModuleKnawatDropshipping extends Model {
-    private $codename = 'knawat_dropshipping';
     private $route = 'extension/module/knawat_dropshipping';
 
     private $languages = array();
-    private $count_languages = 1;
     private $default_language_id = 1;
+    private $default_language = 'en';
     private $all_stores;
+    private $is_admin = false;
 
     public function __construct($registry){
         parent::__construct($registry);
@@ -14,164 +14,23 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
         $this->load->model('localisation/language');
         $this->load->model('setting/store');
 
+        if( false !== stripos( DIR_APPLICATION, 'admin' ) ){
+            $this->is_admin = true;
+        }
+
         $this->all_stores = $this->model_setting_store->getStores();
         $this->languages = $this->model_localisation_language->getLanguages();
-        $this->count_languages = $this->model_localisation_language->getTotalLanguages();
-        $this->default_language_id = (int)$this->config->get('config_language_id');
-        $config_language = $this->config->get('config_language');
-        $config_language = explode( '-', $config_language );
-        $this->default_language = $config_language[0];
-
+        $config_language = $this->config->get('config_admin_language');
+        $language = explode( '-', $config_language );
+        $this->default_language = $language[0];
+        if( isset( $this->languages[$config_language] ) ){
+            $this->default_language_id = (int)$this->languages[$config_language]['language_id'];
+        }
     }
 
     /////////////////////////////////////////////////////////////
     ////////////////////// Product Functions ////////////////////
     /////////////////////////////////////////////////////////////
-     /**
-     * Format product as per Opencart Syntax.
-     */
-    public function format_product( $product, $update = false, $force_update = false ){
-        if( empty( $product ) ){
-            return $product;
-        }
-
-        if( !$update || $force_update ){
-
-            $temp = array(
-                'product_description' => array(),
-                'model'             => isset( $product->sku ) ? $product->sku : '',
-                'sku'               => isset( $product->sku ) ? $product->sku : '',
-                'upc'               => '',
-                'ean'               => '',
-                'jan'               => '',
-                'isbn'              => '',
-                'mpn'               => '',
-                'location'          => '',
-                'price'             => '0',
-                'points'            => '',
-                'tax_class_id'      => '0',
-                'quantity'          => '0',
-                'minimum'           => '1',
-                'subtract'          => '1',
-                'stock_status_id'   => '5',
-                'shipping'          => '1',
-                'date_available'    => date( 'Y-m-d', strtotime( '-1 day') ),
-                'length'            => '',
-                'width'             => '',
-                'height'            => '',
-                'length_class_id'   => '1',
-                'weight'            => '',
-                'weight_class_id'   => '1',
-                'status'            => '1',
-                'sort_order'        => '0',
-                'manufacturer'      => '',
-                'manufacturer_id'   => '0',
-                'product_store'     => array(0),
-                'product_category'  => array(),
-                'product_option'    => array(),
-                'image'             => ''  // This is Pending.
-            );
-
-            //  Add to all stores.
-            foreach ( $this->all_stores as $key => $store ) {
-                $temp['product_store'][] = $store['store_id'];
-            }
-
-            foreach ( $this->languages as $key => $lng ) {
-                // Check for name in current language.
-                $lng_code = explode( '-', $lng['code'] );
-                $lng_code = $lng_code[0];
-
-                $name = (array)$product->name;
-                $description = (array)$product->description;
-
-                $product_name = array_key_exists( $lng_code, $name ) ? $name[$lng_code] : $name['en'];
-                $product_desc = array_key_exists( $lng_code, $description ) ? $description[$lng_code] : $description['en'];
-                $temp['product_description'][$lng['language_id']] = array(
-                    'name'              => $product_name,
-                    'description'       => $product_desc,
-                    'meta_title'        => $product_name,
-                    'meta_description'  => '',
-                    'meta_keyword'      => '',
-                    'tag'               => '',
-                );
-            }
-
-            /**
-             * Setup Product Category.
-             */
-            if( isset( $product->categories ) && !empty( $product->categories ) ) {
-                $new_cats = array();
-                foreach ( $product->categories as $category ) {
-                    if( isset( $category->name ) && !empty( $category->name ) ){
-                        $new_cats[] = (array)$category->name;
-                    }
-                }
-                $temp['product_category'] = $this->parse_categories( $new_cats );
-            }
-        }else{
-            $temp = array();
-        }
-
-        if( isset( $product->variations ) && !empty( $product->variations ) ){
-            $quantity = 0;
-            $price = $product->variations[0]->price;
-            $weight = $product->variations[0]->weight;
-            foreach ( $product->variations as $vvalue ) {
-                $quantity += $vvalue->quantity;
-            }
-            $temp['price']      = $price;
-            $temp['quantity']   = $quantity;
-            $temp['weight']     = $weight;
-            if( $quantity > 0 ){
-                $temp['stock_status_id'] = '7';
-            }else{
-                $temp['stock_status_id'] = '5';
-            }
-
-            $temp['product_option'] = $this->parse_product_options( $product->variations, $price );
-        }
-
-        ///////////////////////////
-        /////// @TODO Image ///////
-        ///////////////////////////
-        return $temp;
-    }
-
-    /**
-     * Import Products
-     */
-    public function import_product( $product, $force_update = false ){
-        if( empty( $product ) ){
-            return false;
-        }
-
-        $this->load->model('catalog/product');
-
-        /* Check for Existing Product */
-        $product_id = $this->get_product_id_by_model( $product->sku );
-
-        if( $product_id && $product_id > 0 ){
-            $product_data = $this->format_product( $product, true, $force_update );
-            if( !empty( $product_data ) ){
-                if( $force_update ){
-                    $this->model_catalog_product->editProduct( $product_id, $product_data );
-                }else{
-                    $product_id = $this->partial_update_product( $product_id, $product_data );
-                }
-            }
-            return array( 'updated' => $product_id );
-        }else{
-            $product_data = $this->format_product( $product );
-
-            if( !empty( $product_data ) ){
-                $product_id = $this->model_catalog_product->addProduct( $product_data );
-                return array( 'created' => $product_id );
-            }
-        }
-        return false;
-    }
-
     /**
      * Partial Product Update.
      *
@@ -211,7 +70,7 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
      * Get Product ID based on model
      */
     public function get_product_id_by_model( $model = '' ) {
-        $temporal_sql = "SELECT product_id FROM `" . DB_PREFIX . "product` WHERE model = '".$this->db->escape($model)."';";
+        $temporal_sql = "SELECT product_id FROM `" . DB_PREFIX . "product` WHERE model = '".$this->db->escape($model)."' LIMIT 1";
         $result = $this->db->query( $temporal_sql );
 
         return !empty($result->row['product_id']) ? $result->row['product_id'] : false;
@@ -275,7 +134,14 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
      */
     public function create_category( $category, $parent_id = 0 ){
 
-        $this->load->model('catalog/category');
+        if( $this->is_admin ){
+            $this->load->model('catalog/category');
+        }else{
+            $admin_dir = str_replace( 'system/', 'admin/', DIR_SYSTEM );
+            require_once $admin_dir . "model/catalog/category.php";
+            $this->model_catalog_category = new ModelCatalogCategory( $this->registry );
+        }
+
         $temp = array(
             'category_description' => array(),
             'category_store' => array(0),
@@ -321,22 +187,19 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
      */
     public function get_category_id_by_name( $cat_name, $parent_id = 0) {
 
-        for ( $i = 1; $i <= 2 ; $i++ ) {
-            $cat_name = ($i == 1) ? $cat_name : htmlspecialchars($cat_name);
+        $cat_name = htmlspecialchars($cat_name);
+        $sql = "SELECT cd.* FROM " . DB_PREFIX . "category_description cd";
 
-            $sql = "SELECT cd.* FROM " . DB_PREFIX . "category_description cd";
+        if($parent_id > 0){
+            $sql .= " INNER JOIN " . DB_PREFIX . "category cat ON(cd.category_id = cat.category_id AND cat.parent_id = ".$parent_id.")";
+        }
 
-            if($parent_id > 0){
-                $sql .= " INNER JOIN " . DB_PREFIX . "category cat ON(cd.category_id = cat.category_id AND cat.parent_id = ".$parent_id.")";
-            }
+        $sql .= " WHERE cd.language_id = " . (int)$this->default_language_id . " AND cd.name='".$this->db->escape( $cat_name )."' ORDER BY cd.category_id DESC";
 
-            $sql .= " WHERE cd.language_id = " . (int)$this->default_language_id . " AND cd.name='".$this->db->escape( $cat_name )."' ORDER BY cd.category_id DESC";
+        $query = $this->db->query($sql);
 
-            $query = $this->db->query($sql);
-
-            if( !empty( $query->num_rows) ){
-                return $query->rows[0]['category_id'];
-            }
+        if( !empty( $query->num_rows) ){
+            return $query->rows[0]['category_id'];
         }
         return false;
     }
@@ -496,7 +359,13 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
             return false;
         }
 
-        $this->load->model('catalog/option');
+        if( $this->is_admin ){
+            $this->load->model('catalog/option');
+        }else{
+            $admin_dir = str_replace( 'system/', 'admin/', DIR_SYSTEM );
+            require_once $admin_dir . "model/catalog/option.php";
+            $this->model_catalog_option = new ModelCatalogOption( $this->registry );
+        }
 
         $temp = array(
             'option_description'=> array(),
