@@ -29,7 +29,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 			'entry_consumer_key' 			=> $this->language->get('entry_consumer_key'),
 			'consumer_key_placeholder' 		=> $this->language->get('consumer_key_placeholder'),
 			'entry_consumer_secret' 		=> $this->language->get('entry_consumer_secret'),
-			'consumer_secret_placeholder' 	=> $this->language->get('consumer_secret_placeholder')
+			'consumer_secret_placeholder' 	=> $this->language->get('consumer_secret_placeholder'),
 		);
 
 		// Check and set warning.
@@ -89,6 +89,14 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 			$data['module_knawat_dropshipping_consumer_secret'] = $this->config->get('module_knawat_dropshipping_consumer_secret');
 		}
 
+		$data['knawat_ajax_url'] = $this->url->link( $this->route .'/ajax_import', 'user_token=' . $this->session->data['user_token'], true);
+
+		if ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] ) {
+			$data['knawat_ajax_loader']  = HTTPS_SERVER .'view/image/knawat_ajax_loader.gif';
+		}else{
+			$data['knawat_ajax_loader']  = HTTP_SERVER .'view/image/knawat_ajax_loader.gif';
+		}
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -107,6 +115,61 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
             return false;
         }
 		return true;
+	}
+
+	public function ajax_import(){
+		require_once( DIR_SYSTEM . 'library/knawat_dropshipping/knawatimporter.php');
+
+		$item = array();
+		if( isset( $this->request->post['process_data'] ) && !empty( $this->request->post['process_data'] ) ){
+			$process_data = $this->request->post['process_data'];
+			$item = array();
+			if( isset( $process_data['limit'] ) ){
+				$item['limit'] = (int)$process_data['limit'];
+			}
+			if( isset( $process_data['page'] ) ){
+				$item['page'] = (int)$process_data['page'];
+			}
+			if( isset( $process_data['force_update'] ) ){
+				$item['force_update'] = (boolean)$process_data['force_update'];
+			}
+			if( isset( $process_data['prevent_timeouts'] ) ){
+				$item['prevent_timeouts'] = (boolean)$process_data['prevent_timeouts'];
+			}
+			if( isset( $process_data['is_complete'] ) ){
+				$item['is_complete'] = (boolean)$process_data['is_complete'];
+			}
+			if( isset( $process_data['imported'] ) ){
+				$item['imported'] = (int)$process_data['imported'];
+			}
+			if( isset( $process_data['failed'] ) ){
+				$item['failed'] = (int)$process_data['failed'];
+			}
+			if( isset( $process_data['updated'] ) ){
+				$item['updated'] = (int)$process_data['updated'];
+			}
+			if( isset( $process_data['batch_done'] ) ){
+				$item['batch_done'] = (boolean)$process_data['batch_done'];
+			}
+		}
+
+		$knawatimporter = new KnawatImporter( $this->registry, $item );
+		$import_data = $knawatimporter->import();
+		
+		$params = $knawatimporter->get_import_params();
+
+		$item = $params;
+		if( true == $params['batch_done'] ){
+			$item['page']  = $params['page'] + 1;
+		}else{
+			$item['page']  = $params['page'];
+		}
+
+		$item['imported'] += count( $import_data['imported'] );
+		$item['failed']   += count( $import_data['failed'] );
+		$item['updated']  += count( $import_data['updated'] );
+		echo $import_data = json_encode( $item );
+		exit();
 	}
 }
 ?>

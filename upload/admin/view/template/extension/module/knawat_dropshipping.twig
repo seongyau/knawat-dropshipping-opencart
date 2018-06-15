@@ -59,9 +59,81 @@
                         </div>
                     </div>
 
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label" for="input-knawat-consumer-secret">{{text_import_products}}</label>
+                        <div class="col-sm-10 ajax_import">
+                            <button id="run_import" class="btn btn-primary">{{text_run_import}}</button>
+                            <div class="import_inprocess" style="display: none;">
+                                <img src="{{knawat_ajax_loader}}" style="width:30px;"/> <strong style="margin-left: 10px;">{{text_import_inprogress}}</strong>
+                                <div class="import_status" style="margin-top: 10px;">
+                                    <p>{{text_import_stats}}:</p>
+                                    <strong>{{text_imported}}:</strong> 0 {{text_products}}<br>
+                                    <strong>{{text_updated}}:</strong> 0 {{text_products}}<br>
+                                    <strong>{{text_failed}}:</strong> 0 {{text_products}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </form>
             </div>
         </div>
     </div>
 </div>
 {{ footer }}
+
+<script type="text/javascript">
+    var knawat_ajax_url = '{{ knawat_ajax_url }}';
+    $(document).ready( function(){
+        $('#run_import').on('click', function(e) {
+            e.preventDefault();
+            process_step();
+            knawat_ajax_import_start();
+        });
+    });
+
+    function process_step( data ) {
+        $.ajax({
+            type: 'POST',
+            url: knawat_ajax_url.replace(/&amp;/g, '&'),
+            data: {
+                process_data: data
+            },
+            dataType: "json",
+            success: function( response ) {
+                if( response.is_complete ) {
+                    /* Done Operation here. */
+                    knawat_ajax_import_stop();
+                    jQuery(".page-header .container-fluid").append('<div class="knawat_import_message alert alert-success"><i class="fa fa-info-circle"></i> {{success_ajaximport}}</div>');
+                    jQuery('.import_inprocess .import_status').html('');
+
+                } else {
+                    /*Update import stats.*/
+                    jQuery('.import_inprocess .import_status').html('<p>{{text_import_stats}}:</p><strong>{{text_imported}}:</strong> ' + response.imported + ' {{text_products}}<br><strong>{{text_updated}}:</strong> ' + response.updated + ' {{text_products}}<br><strong>{{text_failed}}:</strong> ' + response.failed + ' {{text_products}}')
+                    /*Run next batch.*/
+                    process_step( response );
+                }
+
+            }
+        }).fail(function (response) {
+            if ( window.console && window.console.log ) {
+                console.log( response );
+            }
+            knawat_ajax_import_stop();
+            jQuery(".page-header .container-fluid").append('<div class="knawat_import_message alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{error_ajaximport}}</div>');
+        });
+    }
+
+    function knawat_ajax_import_start(){
+        jQuery(".page-header .container-fluid .knawat_import_message").remove();
+        jQuery(".page-header .container-fluid").append('<div class="knawat_import_message alert alert-warning"><i class="fa fa-info-circle"></i> {{warning_ajaximport}}</div>');
+        jQuery('#run_import').hide();
+        jQuery('.ajax_import .import_inprocess').show();
+    }
+
+    function knawat_ajax_import_stop(){
+        jQuery(".page-header .container-fluid .knawat_import_message").remove();
+        jQuery('#run_import').show();
+        jQuery('.ajax_import .import_inprocess').hide();
+    }
+</script>
