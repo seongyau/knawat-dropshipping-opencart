@@ -37,7 +37,7 @@
     /**
      * Knawat MP API Constructor
      */
-    public function __construct( $registry, $import_args = array() ){
+    public function __construct( $registry, $import_args = array(), $import_type = 'full' ){
         
         $this->registry = $registry;
         $this->load->language($this->route);
@@ -65,10 +65,12 @@
             $this->model_extension_module_knawat_dropshipping = new ModelExtensionModuleKnawatDropshipping( $registry );
         }
 
+        $this->import_type = $import_type;
+
         $default_args = array(
             'limit'             => 10,   // Limit for Fetch Products
             'page'              => 1,    // Page Number for API
-            'force_update'      => true, // Whether to update existing items.
+            'force_update'      => false, // Whether to update existing items.
             'prevent_timeouts'  => true, // Check memory and time usage and abort if reaching limit.
             'is_complete'       => false,
             'imported'          => 0,
@@ -102,11 +104,11 @@
 
         // Sample Product till API start working.
         $product = '{
-                  "sku": "46460300192381",
+                  "sku": "46460300192382",
                   "name": {
                     "tr": "DAR KALIP PEMBE GÖMLEK",
                     "ar": "قميص وردي قصير",
-                    "en": "Slimline Pink Shirt"
+                    "en": "Slimline Pink Shirt 2"
                   },
                   "description": {
                     "tr":
@@ -123,7 +125,7 @@
                       "id": 4856,
                       "name": {
                         "tr": "Outdoors / Kadın",
-                        "en": "Outdoors / Women",
+                        "en": "Outdoors / Women2",
                         "ar": "أوت دور / نسائي"
                       }
                     }
@@ -173,7 +175,7 @@
                           "id": 1,
                           "name": {
                             "tr": "Beden",
-                            "en": "Size",
+                            "en": "Size3",
                             "ar": "مقاس"
                           },
                           "option": { "tr": "M", "en": "M", "ar": "M" }
@@ -192,7 +194,7 @@
                           "id": 1,
                           "name": {
                             "tr": "Beden",
-                            "en": "Size",
+                            "en": "Size3",
                             "ar": "مقاس"
                           },
                           "option": { "tr": "XXL", "en": "XXL", "ar": "XXL" }
@@ -212,9 +214,9 @@
                 break;
 
             case 'single':
-                $sku = sanitize_text_field( $this->params['sku'] );
+                $sku = $this->params['sku'];
                 if( empty( $sku ) ){
-                    return array( 'status' => 'fail', 'message' => __( 'Please provide product sku.', 'dropshipping-woocommerce' ) );
+                    return array( 'status' => 'fail', 'message' => 'Please provide product sku.' );
                 }
                 // API Wrapper class here.
                 $productdata->product = '';
