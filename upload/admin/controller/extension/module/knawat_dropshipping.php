@@ -7,7 +7,80 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 	public function __construct($registry) {
 		parent::__construct($registry);
 	}
-	
+
+	public function install(){
+		$this->load->model('setting/event' );
+
+		/**
+		 * Add Events
+		 */
+		$this->model_setting_event->addEvent(
+            'knawat_dropshipping_add_to_cart',
+            'catalog/controller/checkout/cart/add/before',
+            'extension/module/knawat_dropshipping/before_add_to_cart'
+        );
+
+        $this->model_setting_event->addEvent(
+            'knawat_dropshipping_single_product',
+            'catalog/controller/product/product/after',
+            'extension/module/knawat_dropshipping/after_single_product'
+        );
+	}
+
+	public function uninstall(){
+		$this->load->model('setting/event' );
+		$this->load->model('setting/setting');
+
+		$events = $this->model_setting_event->getEvents();
+		$data = array(
+			'knawat_dropshipping_add_to_cart',
+			'knawat_dropshipping_single_product'
+		);
+
+		// Delete events
+		foreach ($events as $event) {
+			if ( in_array($event['code'], $data ) ) {
+				$this->model_setting_event->deleteEvent( $event['event_id'] );
+			}
+		}
+
+		// Delete settings
+		$this->model_setting_setting->deleteSetting('module_knawat_dropshipping');
+	}
+
+	// Enabled & Disable ingnore for now.
+	/* public function enabled() {
+		$this->load->model('setting/event');
+		$events = $this->model_setting_event->getEvents();
+
+		$data = array(
+			'knawat_dropshipping_add_to_cart',
+			'knawat_dropshipping_single_product'
+		);
+
+		foreach ( $events as $event ) {
+			if ( in_array($event['code'], $data) ) {
+				$this->model_setting_event->enableEvent( $event['event_id'] );
+			}
+		}
+	}
+
+	public function disabled() {
+		$this->load->model('setting/event');
+		$events = $this->model_setting_event->getEvents();
+
+		$data = array(
+			'knawat_dropshipping_add_to_cart',
+			'knawat_dropshipping_single_product'
+		);
+
+		foreach ( $events as $event ) {
+			if ( in_array($event['code'], $data) ) {
+				$this->model_setting_event->disableEvent( $event['event_id'] );
+			}
+		}
+	} */
+
 	public function index() {
 
 		$this->load->language( $this->route );
@@ -21,7 +94,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true));
+			$this->response->redirect($this->url->link( $this->route, 'user_token=' . $this->session->data['user_token'] . '&type=module', true));
 		}
 
 		// Load Laguage strings
@@ -44,7 +117,16 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
             $data['error_status'] = $this->error['error_status'];
         } else {
             $data['error_status'] = '';
-        }
+		}
+
+		// Set Success.
+		if (isset($this->session->data['success'])) {
+			$data['success'] = $this->session->data['success'];
+
+			unset($this->session->data['success']);
+		} else {
+			$data['success'] = '';
+		}
 
 		// Setup Breadcrumbs Data.
 		$data['breadcrumbs'] = array();
@@ -110,10 +192,10 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
             return false;
         }
 
-        if(!isset( $this->request->post['module_knawat_dropshipping_status'])){
-            $this->error['error_status'] = $this->language->get('error_status');
-            return false;
-        }
+		if(!isset( $this->request->post['module_knawat_dropshipping_status'])){
+			$this->error['error_status'] = $this->language->get('error_status');
+			return false;
+		}
 		return true;
 	}
 

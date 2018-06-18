@@ -61,7 +61,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 					return;
 				}
 				
-				// impoer product
+				// import product
 				require_once( DIR_SYSTEM . 'library/knawat_dropshipping/knawatimporter.php' );
 				$knawatimporter = new KnawatImporter( $this->registry, array( 'sku'=> $product_sku ), 'single' );
 				$import_results = $knawatimporter->import();
