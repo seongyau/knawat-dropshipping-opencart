@@ -319,12 +319,24 @@
                     $product_id = $this->model_extension_module_knawat_dropshipping->partial_update_product( $product_id, $product_data );
                 }
             }
+
+            // Update product options SKU
+            $productOptions = $this->model_catalog_product->getProductOptions( $product_id );
+            $this->model_extension_module_knawat_dropshipping->update_product_options_sku( $product_id, $product_data, $productOptions );
+            // update custom meta
+            $this->model_extension_module_knawat_dropshipping->update_knawat_meta( $product_id, 'is_knawat','1', 'product' );
             return array( 'updated' => $product_id );
         }else{
             $product_data = $this->format_product( $product );
 
             if( !empty( $product_data ) ){
                 $product_id = $this->model_catalog_product->addProduct( $product_data );
+
+                // Update product options SKU
+                $productOptions = $this->model_catalog_product->getProductOptions( $product_id );
+                $this->model_extension_module_knawat_dropshipping->update_product_options_sku( $product_id, $product_data, $productOptions );
+                // update custom meta
+                $this->model_extension_module_knawat_dropshipping->update_knawat_meta( $product_id, 'is_knawat','1', 'product' );
                 return array( 'imported' => $product_id );
             }
         }

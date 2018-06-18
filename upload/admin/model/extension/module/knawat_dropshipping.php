@@ -28,6 +28,112 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
         }
     }
 
+    public function install(){
+        // create knawat metadata table into database.
+        $query = $this->db->query("CREATE TABLE IF NOT EXISTS `".DB_PREFIX."knawat_metadata` (
+            `meta_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `resource_id` bigint(20) unsigned NOT NULL DEFAULT '0',
+            `resource_type` varchar(255) NULL,
+            `meta_key` varchar(255) NULL,
+            `meta_value` longtext NULL
+            ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;");
+    }
+
+    /////////////////////////////////////////////////////////////
+    ////////////////////// MetaData Functions ///////////////////
+    /////////////////////////////////////////////////////////////
+
+    /**
+     * Get Custom data by id and resource.
+     */
+    public function get_knawat_meta( $resource_id, $meta_key,  $resource_type = 'product', $single = true ) {
+        $get_sql = "SELECT * FROM `" . DB_PREFIX . "knawat_metadata` WHERE `resource_id` = ".(int)$resource_id." AND `meta_key` = '".$this->db->escape($meta_key)."' AND `resource_type` = '".$this->db->escape($resource_type)."' LIMIT 1";
+        $result = $this->db->query( $get_sql );
+        if( isset( $result->num_rows ) && $result->num_rows > 0 && !empty( $result->rows ) ){
+            if( $single ){
+                return $result->rows[0]['meta_value'];
+            }else{
+                return $result->rows[0];
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Add Custom data by id and resource.
+     */
+    public function add_knawat_meta( $resource_id, $meta_key, $meta_value = '', $resource_type = 'product' ) {
+        $insert_sql = "INSERT INTO `" . DB_PREFIX . "knawat_metadata` (`resource_id`, `resource_type`, `meta_key`, `meta_value`) VALUES (".(int)$resource_id.", '".$this->db->escape($resource_type)."', '".$this->db->escape($meta_key)."', '".$this->db->escape($meta_value)."');";
+        $result = $this->db->query( $insert_sql );
+        // Last instered ID.
+        $meta_id = $this->db->getLastId();
+        if( $meta_id > 0 ){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Update Custom data by id and resource.
+     */
+    public function update_knawat_meta( $resource_id, $meta_key, $meta_value = '', $resource_type = 'product' ) {
+
+        $meta = $this->get_knawat_meta( $resource_id, $meta_key, $resource_type, false );
+        if( $meta && !empty( $meta ) && $meta['meta_id'] > 0 ){
+            $meta_id = (int)$meta['meta_id'];
+
+            $update_query = "UPDATE " . DB_PREFIX . "knawat_metadata SET `resource_id` = ".(int)$resource_id.", `meta_key` = '" . $this->db->escape($meta_key) . "', `meta_value` = '" . $this->db->escape($meta_value) . "', `resource_type` = '" . $this->db->escape($resource_type) . "' WHERE meta_id = " . (int)$meta_id;
+
+            $update = $this->db->query( $update_query );
+            return $update;
+        }
+
+        // Meta data not exist add it.
+        $addmeta = $this->add_knawat_meta( $resource_id, $meta_key, $meta_value, $resource_type );
+        return $addmeta;
+    }
+
+    /**
+     * Update Custom data by id and resource.
+     */
+    public function delete_knawat_meta( $resource_id, $meta_key, $resource_type = 'product' ) {
+        $delete_query = "DELETE FROM " . DB_PREFIX . "knawat_metadata WHERE resource_id = " . (int)$resource_id . " AND `meta_key` = '" . $this->db->escape($meta_key) . "' AND `resource_type` = '" . $this->db->escape($resource_type) . "'";
+
+        $delete = $this->db->query( $delete_query );
+        return $delete;
+    }
+
+    /**
+     * Update Product option skus.
+     */
+    public function update_product_options_sku( $product_id, $product_data, $productOptions ) {
+
+        if( is_array( $productOptions ) && is_array( $product_data['product_option'] ) ){
+            $i = 0;
+            $poptions = array();
+            foreach( $productOptions as $pro_opt ){
+                $ii = 0;
+                if( count( $pro_opt['product_option_value'] ) != count( $product_data['product_option'][$i]['product_option_value'] ) ){
+                    return;
+                }
+                foreach( $pro_opt['product_option_value'] as $pro_opt_value ){
+                    $poptions[] = array_merge( $product_data['product_option'][$i]['product_option_value'][$ii], $pro_opt_value );
+                    $ii++;
+                }
+                $i++;
+            }
+            if( !empty( $poptions ) ){
+                foreach( $poptions as $poption ){
+                    if( isset( $poption['product_option_value_id'] ) && isset( $poption['sku'] ) ){
+                        $this->db->query( "DELETE FROM " . DB_PREFIX . "knawat_metadata WHERE `meta_key` = 'sku' AND `resource_type` = 'product_option_value' AND `meta_value` = '" . $this->db->escape( $poption['sku'] ) . "'" );
+                        $this->update_knawat_meta( $poption['product_option_value_id'], 'sku', $poption['sku'], 'product_option_value' );
+                    }
+                }
+            }
+        }
+
+    }
+
     /////////////////////////////////////////////////////////////
     ////////////////////// Product Functions ////////////////////
     /////////////////////////////////////////////////////////////
@@ -260,6 +366,7 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
                         }
                         $varients[ $option_name ][$option_value_name]['price'] = isset( $variation->price ) ? $variation->price : 0;
                         $varients[ $option_name ][$option_value_name]['quantity'] = isset( $variation->quantity ) ? $variation->quantity : 0;
+                        $varients[ $option_name ][$option_value_name]['sku'] = isset( $variation->sku ) ? $variation->sku : '';
                     }
                 }
             }
@@ -295,6 +402,7 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
                                 'option_value_id'           => '',
                                 'product_option_value_id'   => '',
                                 'quantity'                  => $varients[$key][$okey]['quantity'],
+                                'sku'                       => $varients[$key][$okey]['sku'],
                                 'subtract'                  => '1',
                                 'price_prefix'              => '+',
                                 'price'                     => '0',

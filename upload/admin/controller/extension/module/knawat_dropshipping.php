@@ -10,21 +10,23 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 
 	public function install(){
 		$this->load->model('setting/event' );
+		$this->load->model( $this->route );
+		$this->model_extension_module_knawat_dropshipping->install();
 
 		/**
 		 * Add Events
 		 */
 		$this->model_setting_event->addEvent(
-            'knawat_dropshipping_add_to_cart',
-            'catalog/controller/checkout/cart/add/before',
-            'extension/module/knawat_dropshipping/before_add_to_cart'
-        );
+			'knawat_dropshipping_add_to_cart',
+			'catalog/controller/checkout/cart/add/before',
+			'extension/module/knawat_dropshipping/before_add_to_cart'
+		);
 
-        $this->model_setting_event->addEvent(
-            'knawat_dropshipping_single_product',
-            'catalog/controller/product/product/after',
-            'extension/module/knawat_dropshipping/after_single_product'
-        );
+		$this->model_setting_event->addEvent(
+			'knawat_dropshipping_single_product',
+			'catalog/controller/product/product/after',
+			'extension/module/knawat_dropshipping/after_single_product'
+		);
 	}
 
 	public function uninstall(){
