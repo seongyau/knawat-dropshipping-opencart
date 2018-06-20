@@ -559,4 +559,27 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
         return $option_value_id;
     }
 
+    public function get_order_status_name( $order_status_id ) {
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_status WHERE order_status_id = '" . (int)$order_status_id . "' AND language_id = '" . (int)$this->default_language_id . "'");
+
+        if( !empty( $query->row ) ){
+            return $query->row['name'];
+        }
+		return false;
+    }
+
+    public function edit_setting( $code, $data, $store_id = 0 ) {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "setting` WHERE store_id = '" . (int)$store_id . "' AND `code` = '" . $this->db->escape($code) . "'");
+
+		foreach ($data as $key => $value) {
+			if (substr($key, 0, strlen($code)) == $code) {
+				if (!is_array($value)) {
+					$this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '" . (int)$store_id . "', `code` = '" . $this->db->escape($code) . "', `key` = '" . $this->db->escape($key) . "', `value` = '" . $this->db->escape($value) . "'");
+				} else {
+					$this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '" . (int)$store_id . "', `code` = '" . $this->db->escape($code) . "', `key` = '" . $this->db->escape($key) . "', `value` = '" . $this->db->escape(json_encode($value, true)) . "', serialized = '1'");
+				}
+			}
+		}
+	}
+
 }

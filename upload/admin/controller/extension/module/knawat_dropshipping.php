@@ -27,6 +27,12 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 			'catalog/controller/product/product/after',
 			'extension/module/knawat_dropshipping/after_single_product'
 		);
+
+		$this->model_setting_event->addEvent(
+            'knawat_dropshipping_order_changed',
+            'catalog/model/checkout/order/addOrderHistory/after',
+            'extension/module/knawat_dropshipping/order_changed'
+        );
 	}
 
 	public function uninstall(){
@@ -36,7 +42,8 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		$events = $this->model_setting_event->getEvents();
 		$data = array(
 			'knawat_dropshipping_add_to_cart',
-			'knawat_dropshipping_single_product'
+			'knawat_dropshipping_single_product',
+			'knawat_dropshipping_order_changed'
 		);
 
 		// Delete events
@@ -57,7 +64,8 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 
 		$data = array(
 			'knawat_dropshipping_add_to_cart',
-			'knawat_dropshipping_single_product'
+			'knawat_dropshipping_single_product',
+			'knawat_dropshipping_order_changed'
 		);
 
 		foreach ( $events as $event ) {
@@ -73,7 +81,8 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 
 		$data = array(
 			'knawat_dropshipping_add_to_cart',
-			'knawat_dropshipping_single_product'
+			'knawat_dropshipping_single_product',
+			'knawat_dropshipping_order_changed'
 		);
 
 		foreach ( $events as $event ) {

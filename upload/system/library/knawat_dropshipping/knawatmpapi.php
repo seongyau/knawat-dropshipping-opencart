@@ -58,15 +58,14 @@
             $this->is_admin = true;
         }
 
-        if( $this->is_admin ){
-            $this->load->model('setting/setting');
-        }else{
-            $admin_dir = str_replace( 'system/', 'admin/', DIR_SYSTEM );
-            require_once $admin_dir . "model/setting/setting.php";
-            $this->model_setting_setting = new ModelSettingSetting( $registry );
-        }
-
+        $this->load->model('setting/setting');
         $settings = $this->model_setting_setting->getSetting('module_knawat_dropshipping');
+
+        if( !isset( $this->model_extension_module_knawat_dropshipping ) || empty( $this->model_extension_module_knawat_dropshipping ) ){
+            $admin_dir = str_replace( 'system/', 'admin/', DIR_SYSTEM );
+            require_once $admin_dir . "model/extension/module/knawat_dropshipping.php";
+            $this->model_extension_module_knawat_dropshipping = new ModelExtensionModuleKnawatDropshipping( $this->registry );
+        }
 
         if ($settings) {
             $this->init(
@@ -118,9 +117,11 @@
                     $this->access_token = $access_token;
                     $settings['module_knawat_dropshipping_access_token'] = $access_token;
                     $settings['module_knawat_dropshipping_token_expiry'] = strtotime('+24 hours');
-                    
-                    // Update Token to Settings.
-                    $this->model_setting_setting->editSetting( 'module_knawat_dropshipping', $settings );
+
+                    // Update latest Settings.
+                    $this->model_extension_module_knawat_dropshipping->edit_setting( 'module_knawat_dropshipping', $settings );
+                }else{
+                    // @TODO: Failed to get access token handle error here.
                 }
             }
         
@@ -135,8 +136,10 @@
      */
     public function getToken(){
         
-        if( empty( $this->consumer_key ) || empty( $this->consumer_secret ) || 1 ){
-            throw new Exception( 'Consumer Key and Consumer Secret needed.' );
+        if( empty( $this->consumer_key ) || empty( $this->consumer_secret ) ){
+            return false;
+            //@TODO: Handle error
+            //throw new Exception( 'Consumer Key and Consumer Secret needed.' );
         }
 
         $data = array(
@@ -150,9 +153,9 @@
         curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, 'POST' );
         curl_setopt( $ch, CURLOPT_POSTFIELDS, $data );
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-        curl_setopt( $ch, CURLOPT_TIMEOUT, 60 );
+        curl_setopt( $ch, CURLOPT_TIMEOUT, 30 );
         curl_setopt( $ch, CURLOPT_MAXREDIRS, 10 );
-        curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 120 );
+        curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 30 );
         if (stripos( $this->api_url, 'https') !== false) {
             curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 0 );
             curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0 );
@@ -165,26 +168,20 @@
         // Execute the request and decode the response to JSON
         $resource_data = json_decode( curl_exec( $ch ) );
         $response_code = (int) curl_getinfo( $ch, CURLINFO_HTTP_CODE );
-        
-        /* if( $response_code > 299 ) {
-            if( isset( $resource_data->message) ) {
-                throw new Exception( $resource_data->message, $response_code );
-            } else {
-                throw new Exception( (string) json_encode($resource_data), $response_code );
-            }
-        } */
-        
+
         // Close cURL Connection.
         curl_close( $ch );
 
-        /**
-         * @TODO
-         * //////////////////////////////////////////////////////////////////////
-         * //////////////Logic for get accesstoke is happen here. ///////////////
-         * //////////////////////////////////////////////////////////////////////
-         */
-        $access_token = 'meistoken';
-        return $access_token;
+        if( $response_code > 299 ) {
+            return false;
+        }
+
+        if( isset( $resource_data->channel ) ){
+            $access_token = $resource_data->channel->token;
+            return $access_token;
+        }
+
+        return false;
     }
 
     /**
@@ -307,7 +304,7 @@
                 throw new Exception( $resource_data->message, $response_code ); 
             } else {
                 throw new Exception( (string) json_encode($resource_data), $response_code );
-            } 			
+            }
         }
 
         // Everything went well, return the resource data object.
@@ -354,9 +351,9 @@
 
             $this->ch = curl_init();
             curl_setopt( $this->ch, CURLOPT_RETURNTRANSFER, 1 );
-            curl_setopt( $this->ch, CURLOPT_TIMEOUT, 60 );
+            curl_setopt( $this->ch, CURLOPT_TIMEOUT, 30 );
             curl_setopt( $this->ch, CURLOPT_MAXREDIRS, 10 );
-            curl_setopt( $this->ch, CURLOPT_CONNECTTIMEOUT, 120 );
+            curl_setopt( $this->ch, CURLOPT_CONNECTTIMEOUT, 30 );
             if (stripos( $this->api_url, 'https') !== false) {
                 curl_setopt( $this->ch, CURLOPT_SSL_VERIFYPEER, 0 );
                 curl_setopt( $this->ch, CURLOPT_SSL_VERIFYHOST, 0 );
