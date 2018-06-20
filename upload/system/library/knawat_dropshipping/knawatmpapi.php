@@ -89,6 +89,8 @@
 
         if( !empty( $this->consumer_key ) && !empty( $this->consumer_key ) ){
             $token = $this->setToken();
+        }else{
+            $this->log->write( 'Consumer Key and Consumer Secret needed for given operation.' );
         }
     }
 
@@ -122,6 +124,7 @@
                     $this->model_extension_module_knawat_dropshipping->edit_setting( 'module_knawat_dropshipping', $settings );
                 }else{
                     // @TODO: Failed to get access token handle error here.
+                    $this->log->write( 'Something went wrong during get token from MP API' );
                 }
             }
         
@@ -137,6 +140,7 @@
     public function getToken(){
         
         if( empty( $this->consumer_key ) || empty( $this->consumer_secret ) ){
+            $this->log->write( 'Consumer Key and Consumer Secret needed for get token.' );
             return false;
             //@TODO: Handle error
             //throw new Exception( 'Consumer Key and Consumer Secret needed.' );
