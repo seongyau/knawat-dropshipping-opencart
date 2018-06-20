@@ -106,32 +106,18 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
     /**
      * Update Product option skus.
      */
-    public function update_product_options_sku( $product_id, $product_data, $productOptions ) {
+    public function update_product_options_sku( $product_id, $data, $productOptions ) {
 
-        if( is_array( $productOptions ) && is_array( $product_data['product_option'] ) ){
-            $i = 0;
-            $poptions = array();
-            foreach( $productOptions as $pro_opt ){
-                $ii = 0;
-                if( count( $pro_opt['product_option_value'] ) != count( $product_data['product_option'][$i]['product_option_value'] ) ){
-                    return;
-                }
-                foreach( $pro_opt['product_option_value'] as $pro_opt_value ){
-                    $poptions[] = array_merge( $product_data['product_option'][$i]['product_option_value'][$ii], $pro_opt_value );
-                    $ii++;
-                }
-                $i++;
-            }
-            if( !empty( $poptions ) ){
-                foreach( $poptions as $poption ){
-                    if( isset( $poption['product_option_value_id'] ) && isset( $poption['sku'] ) ){
-                        $this->db->query( "DELETE FROM " . DB_PREFIX . "knawat_metadata WHERE `meta_key` = 'sku' AND `resource_type` = 'product_option_value' AND `meta_value` = '" . $this->db->escape( $poption['sku'] ) . "'" );
-                        $this->update_knawat_meta( $poption['product_option_value_id'], 'sku', $poption['sku'], 'product_option_value' );
-                    }
+        $data = $this->load_options_id_to_data( $product_id, $data );
+
+        $poptions = array();
+        foreach ($data['product_option'] as $pkey => $product_option) {
+            foreach ($product_option['product_option_value'] as $pvkey => $poptionv) {
+                if( isset( $poptionv['product_option_value_id'] ) && isset( $poptionv['sku'] ) ){
+                    $this->update_knawat_meta( $poptionv['product_option_value_id'], 'sku', $poptionv['sku'], 'product_option_value' );
                 }
             }
         }
-
     }
 
     /////////////////////////////////////////////////////////////
@@ -145,6 +131,7 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
 
         $this->db->query("UPDATE " . DB_PREFIX . "product SET quantity = '" . (int)$data['quantity'] . "', stock_status_id = '" . (int)$data['stock_status_id'] . "', price = '" . (float)$data['price'] . "', date_modified = NOW() WHERE product_id = '" . (int)$product_id . "'");
 
+        $data = $this->load_options_id_to_data( $product_id, $data );
 
         $this->db->query("DELETE FROM " . DB_PREFIX . "product_option WHERE product_id = '" . (int)$product_id . "'");
         $this->db->query("DELETE FROM " . DB_PREFIX . "product_option_value WHERE product_id = '" . (int)$product_id . "'");
@@ -180,6 +167,37 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
         $result = $this->db->query( $temporal_sql );
 
         return !empty($result->row['product_id']) ? $result->row['product_id'] : false;
+    }
+
+    /**
+     * Load Existing IDs (For prevent generate new IDs)
+     *
+     * @param   array $data
+     * @return  array $data
+     */
+    public function load_options_id_to_data( $product_id, $data ){
+
+        if (isset($data['product_option'])) {
+            foreach ($data['product_option'] as $pkey => $product_option) {
+                $psql = "SELECT product_option_id FROM " . DB_PREFIX . "product_option WHERE `product_id` = ".(int)$product_id." AND `option_id` = " . (int)$product_option['option_id'] . " LIMIT 1";
+                $pquery = $this->db->query($psql);
+                if( !empty( $pquery->rows ) && $pquery->num_rows > 0 ){
+                    $product_option_id = $pquery->rows[0]['product_option_id'];
+                    $data['product_option'][$pkey]['product_option_id'] = $product_option_id;
+
+                    foreach ($product_option['product_option_value'] as $pvkey => $product_option_value) {
+
+                        $pvsql = "SELECT product_option_value_id FROM " . DB_PREFIX . "product_option_value WHERE `product_option_id` = ".(int)$product_option_id." AND `product_id` = ".(int)$product_id." AND `option_id` = " . (int)$product_option['option_id'] . "  AND `option_value_id` = " . (int)$product_option_value['option_value_id'] . " LIMIT 1";
+                        $pvquery = $this->db->query( $pvsql );
+                        if( !empty( $pvquery->rows ) && $pvquery->num_rows > 0 ){
+                            $product_option_value_id = $pvquery->rows[0]['product_option_value_id'];
+                            $data['product_option'][$pkey]['product_option_value'][$pvkey]['product_option_value_id'] = $product_option_value_id;
+                        }
+                    }
+                }
+            }
+        }
+        return $data;
     }
 
     /////////////////////////////////////////////////////////////
