@@ -12,13 +12,13 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
         parent::__construct($registry);
         $this->load->language($this->route);
         $this->load->model('localisation/language');
-        $this->load->model('setting/store');
 
         if( false !== stripos( DIR_APPLICATION, 'admin' ) ){
             $this->is_admin = true;
         }
 
-        $this->all_stores = $this->model_setting_store->getStores();
+        $this->all_stores = $this->config->get('module_knawat_dropshipping_store');
+
         $this->languages = $this->model_localisation_language->getLanguages();
         $config_language = $this->config->get('config_admin_language');
         $language = explode( '-', $config_language );
@@ -298,8 +298,8 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
             );
         }
 
-        foreach ( $this->all_stores as $key => $store ) {
-            $temp['category_store'][] = $store['store_id'];
+        if ( !empty( $this->all_stores ) ) {
+            $temp['category_store'] = $this->all_stores;
         }
 
         return $this->model_catalog_category->addCategory($temp);

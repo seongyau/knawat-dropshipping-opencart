@@ -182,6 +182,33 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 			$data['module_knawat_dropshipping_consumer_secret'] = $this->config->get('module_knawat_dropshipping_consumer_secret');
 		}
 
+		// Setup Stores.
+		$this->load->model('setting/store');
+		$data['stores'] = array();
+		$data['stores'][] = array(
+			'store_id' => 0,
+			'name'     => $this->language->get('text_default')
+		);
+
+		$stores = $this->model_setting_store->getStores();
+		foreach ($stores as $store) {
+			$data['stores'][] = array(
+				'store_id' => $store['store_id'],
+				'name'     => $store['name']
+			);
+		}
+
+		if (isset($this->request->post['module_knawat_dropshipping_store'])) {
+			$data['module_knawat_dropshipping_store'] = $this->request->post['module_knawat_dropshipping_store'];
+		} else {
+			$kstores = $this->config->get('module_knawat_dropshipping_store');
+			if( !empty( $kstores ) ){
+				$data['module_knawat_dropshipping_store'] = $kstores;
+			}else{
+				$data['module_knawat_dropshipping_store'] = array(0);
+			}
+		}
+
 		$data['knawat_ajax_url'] = $this->url->link( $this->route .'/ajax_import', 'user_token=' . $this->session->data['user_token'], true);
 
 		if ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] ) {
