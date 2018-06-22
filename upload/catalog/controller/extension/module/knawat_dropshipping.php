@@ -17,7 +17,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		$order_id = $data[0];
 		$order_status_id = $data[1];
 		if( empty( $order_id ) || empty( $order_status_id ) ){
-			return;
+			return false;
 		}
 		$is_update = false;
 
@@ -36,12 +36,12 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 
 		if (!$order) {
 			$this->log->write("Failed to load Order at send order to knawat.com, getOrder() failed. order_id:" . $order_id);
-			return;
+			return false;
 		}
 
 		if (!$order_products) {
 			$this->log->write("Failed to load Order Products at send order to knawat.com, getOrderProducts() failed. order_id:" . $order_id);
-			return;
+			return false;
 		}
 
 		// Check Order if already created at MP or not.
@@ -56,7 +56,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		$knawat_order = $this->order_has_knawat_product( $order_products );
 		if( !$knawat_order ){
 			$this->model_extension_module_knawat_dropshipping->delete_knawat_meta( $order_id, 'knawat_sync_failed', 'order' );
-			return;
+			return true;
 		}
 
 		/**
@@ -72,7 +72,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 
 		if( empty( $mp_order ) ){
 			$this->log->write("Failed to format Order as per MP API at send order to knawat.com, format_order() failed. order_id:" . $order_id);
-			return;
+			return false;
 		}
 
 		require_once( DIR_SYSTEM . 'library/knawat_dropshipping/knawatmpapi.php' );
@@ -95,6 +95,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 			}
 			if( $failed ){
 				$this->model_extension_module_knawat_dropshipping->update_knawat_meta( $order_id, 'knawat_sync_failed', $failed_message, 'order' );
+				return false;
 			}
 		}else{
 
@@ -120,8 +121,10 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 			}
 			if( $failed ){
 				$this->model_extension_module_knawat_dropshipping->update_knawat_meta( $order_id, 'knawat_sync_failed', $failed_message, 'order' );
+				return false;
 			}
 		}
+		return true;
 	}
 
 	/**
@@ -660,10 +663,17 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		if( !empty( $orders ) ){
 			$this->load->model("checkout/order");
 			try{
+				$failed = false;
 				foreach( $orders as $order ){
 					$order = $this->model_checkout_order->getOrder($order['resource_id'] );
 					$orderdata = array( $order['order_id'], $order['order_status_id'] );
-					$this->order_changed( '', $orderdata );
+					$result = $this->order_changed( '', $orderdata );
+					if( !$result ){
+						$failed = true;
+					}
+				}
+				if( $failed ){
+					exit(json_encode( array( 'error' => '1' ) ) );
 				}
 			}catch( Exception $e ){
 				exit(json_encode( array( 'error' => $e->getMessage() ) ) );

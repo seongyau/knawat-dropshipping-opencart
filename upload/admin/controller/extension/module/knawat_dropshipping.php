@@ -93,10 +93,10 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 	} */
 
 	public function index() {
-
 		if( !session_id() ){
 			session_start();
 		}
+
 		$this->load->language( $this->route );
 		$this->document->setTitle($this->language->get('heading_title'));
 
@@ -106,6 +106,9 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		// Validate and Submit Posts 
 		if ( ($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate() ) {
 			$this->model_setting_setting->editSetting('module_knawat_dropshipping', $this->request->post );
+
+			require_once( DIR_SYSTEM . 'library/knawat_dropshipping/knawatmpapi.php' );
+			$knawatapi = new KnawatMPAPI( $this->registry );
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -147,6 +150,20 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 			unset($this->session->data['success']);
 		} else {
 			$data['success'] = '';
+		}
+
+		// Token Error.
+		if (isset($this->session->data['token_error'])) {
+			$data['token_error'] = $this->session->data['token_error'];
+
+			unset($this->session->data['token_error']);
+		} else {
+			$data['token_error'] = '';
+		}
+
+		$data['token_valid'] = false;
+		if( $this->is_valid_token() ){
+			$data['token_valid'] = true;
 		}
 
 		// Setup Breadcrumbs Data.
@@ -305,6 +322,17 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		$item['updated']  += count( $import_data['updated'] );
 		echo $import_data = json_encode( $item );
 		exit();
+	}
+
+	/**
+	 * Check if site has valid Access token
+	 */
+	public function is_valid_token(){
+		$is_valid = $this->config->get('module_knawat_dropshipping_valid_token');
+		if( $is_valid == '1' ){
+			return true;
+		}
+		return false;
 	}
 }
 ?>

@@ -90,7 +90,7 @@
         if( !empty( $this->consumer_key ) && !empty( $this->consumer_key ) ){
             $token = $this->setToken();
         }else{
-            $this->log->write( 'Consumer Key and Consumer Secret needed for given operation.' );
+            $this->log->write( $this->language->get('warning_apikey_needed') );
         }
     }
 
@@ -108,23 +108,32 @@
         $settings = $this->model_setting_setting->getSetting('module_knawat_dropshipping');
 
         if ($settings) {
+            $valid_token = isset( $settings['module_knawat_dropshipping_valid_token'] ) ? $settings['module_knawat_dropshipping_valid_token'] : '0';
             $access_token = isset( $settings['module_knawat_dropshipping_access_token'] ) ? $settings['module_knawat_dropshipping_access_token'] : '';
             $token_expiry = isset( $settings['module_knawat_dropshipping_token_expiry'] ) ? $settings['module_knawat_dropshipping_token_expiry'] : time();
 
-            if( $access_token !='' && $token_expiry > time() ){
+            if( '1' === $valid_token && $access_token !='' && $token_expiry > time() ){
                 $this->access_token = $access_token;
             }else{
-                $access_token = $this->getToken();
-                if( !empty ( $access_token ) ){
-                    $this->access_token = $access_token;
-                    $settings['module_knawat_dropshipping_access_token'] = $access_token;
-                    $settings['module_knawat_dropshipping_token_expiry'] = strtotime('+24 hours');
+                try{
+                    $access_token = $this->getToken();
+                    if( !empty ( $access_token ) ){
+                        $this->access_token = $access_token;
+                        $settings['module_knawat_dropshipping_valid_token']  = '1';
+                        $settings['module_knawat_dropshipping_access_token'] = $access_token;
+                        $settings['module_knawat_dropshipping_token_expiry'] = strtotime('+24 hours');
 
-                    // Update latest Settings.
-                    $this->model_extension_module_knawat_dropshipping->edit_setting( 'module_knawat_dropshipping', $settings );
-                }else{
-                    // @TODO: Failed to get access token handle error here.
-                    $this->log->write( 'Something went wrong during get token from MP API' );
+                        // Update latest Settings.
+                        $this->model_extension_module_knawat_dropshipping->edit_setting( 'module_knawat_dropshipping', $settings );
+                    }else{
+                        // @TODO: Failed to get access token handle error here.
+                        $this->session->data['token_error'] = 'Something went wrong during get token from MP API';
+                        $this->log->write( 'Something went wrong during get token from MP API' );
+                    }
+                }catch( Exception $e ){
+                    $error_message = $e->getMessage();
+                    $this->log->write( $error_message );
+                    $this->session->data['token_error'] = $error_message;
                 }
             }
         
@@ -140,10 +149,9 @@
     public function getToken(){
         
         if( empty( $this->consumer_key ) || empty( $this->consumer_secret ) ){
-            $this->log->write( 'Consumer Key and Consumer Secret needed for get token.' );
-            return false;
-            //@TODO: Handle error
-            //throw new Exception( 'Consumer Key and Consumer Secret needed.' );
+            $keyerror = $this->language->get('warning_apikey_needed');
+            $this->log->write( $keyerror );
+            throw new Exception( $keyerror );
         }
 
         $data = array(
@@ -168,7 +176,7 @@
         curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/json'
         ));
-       
+
         // Execute the request and decode the response to JSON
         $resource_data = json_decode( curl_exec( $ch ) );
         $response_code = (int) curl_getinfo( $ch, CURLINFO_HTTP_CODE );
@@ -177,7 +185,11 @@
         curl_close( $ch );
 
         if( $response_code > 299 ) {
-            return false;
+            if( isset( $resource_data->message) ) {
+                throw new Exception( $resource_data->message, $response_code );
+            } else {
+                throw new Exception( (string) json_encode($resource_data), $response_code );
+            }
         }
 
         if( isset( $resource_data->channel ) ){

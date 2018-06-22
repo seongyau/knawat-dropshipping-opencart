@@ -27,6 +27,12 @@
             <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
         {% endif %}
+        {% if token_error %}
+        <div class="alert alert-danger alert-dismissible">
+            <i class="fa fa-exclamation-circle"></i> {{ token_error }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        {% endif %}
         {% if ordersync_warning %}
         <div class="alert alert-warning alert-dismissible knawat_message">
             <i class="fa fa-exclamation-circle"></i>
@@ -85,6 +91,19 @@
                     </div>
 
                     <div class="form-group">
+                        <label class="col-sm-2 control-label">{{ entry_connection }}</label>
+                        <div class="col-sm-10">
+                            {% if token_valid %}
+                            <h4><span class="label label-success">{{ text_connected }}</span></h4>
+                            <small>{{ text_connected_desc }}</small>
+                            {% else %}
+                            <h4><span class="label label-danger">{{ text_notconnected }}</span></h4>
+                            <small>{{ text_notconnected_desc }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         <label class="col-sm-2 control-label">{{ entry_store }}</label>
                         <div class="col-sm-10">
                             <div class="well well-sm" style="height: 150px; overflow: auto;">
@@ -99,6 +118,7 @@
                         </div>
                     </div>
 
+                    {% if token_valid %}
                     <div class="form-group">
                         <label class="col-sm-2 control-label" for="input-knawat-consumer-secret">{{text_import_products}}</label>
                         <div class="col-sm-10 ajax_import">
@@ -117,6 +137,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
 
                 </form>
             </div>
@@ -213,7 +234,11 @@
                         }else{
                             jQuery(".knawat_message").remove();
                             if (typeof response.error !== 'undefined') {
-                                jQuery(".page-header .container-fluid").append( '<div class="knawat_message alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + response.error + '</div>' );
+                                var order_error = response.error;
+                                if( '1' === order_error ){
+                                    order_error = '{{error_wrong}}';
+                                }
+                                jQuery(".page-header .container-fluid").append( '<div class="knawat_message alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + order_error + '</div>' );
                             }
                         }
                     }

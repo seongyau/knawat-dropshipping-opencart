@@ -28,3 +28,6 @@ $_['column_price']               = 'Unit Price';
 $_['error_order_id']             = 'Order id is required.';
 $_['error_order_notfound']       = 'Not found Requested Order';
 $_['error_wrong']                = 'Something went wrong during get order. Please try again.';
+
+// Warning
+$_['warning_apikey_needed']         = 'Consumer Key and Consumer Secret needed for get knawat access token.';
