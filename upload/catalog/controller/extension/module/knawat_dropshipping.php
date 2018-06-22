@@ -55,6 +55,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		 */
 		$knawat_order = $this->order_has_knawat_product( $order_products );
 		if( !$knawat_order ){
+			$this->model_extension_module_knawat_dropshipping->delete_knawat_meta( $order_id, 'knawat_sync_failed', 'order' );
 			return;
 		}
 
@@ -624,5 +625,51 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		}
 
 		$this->response->setOutput($this->load->view('knawat_dropshipping/order_invoice', $data));
+	}
+
+	/**
+	 * Sync Orders
+	 */
+	public function sync_failed_order(){
+		header('Content-Type: application/json');
+
+		if( !session_id() ){
+			session_start();
+		}
+		if (! isset($_SESSION['csrf_token'])) {
+			$_SESSION['csrf_token'] = base64_encode(openssl_random_pseudo_bytes(32));
+		}
+		$csrf_token = $_SESSION['csrf_token'];
+		unset( $_SESSION['csrf_token'] );
+
+		$headers = apache_request_headers();
+		if( !isset( $headers['CsrfToken'] ) || $headers['CsrfToken'] != $csrf_token ){
+			exit( json_encode( array( 'error' => 'invalid_CSRF_token' ) ) );
+		}
+		/* if (isset($_SERVER['HTTP_REFERER'])) {
+			$server_name = $_SERVER['SERVER_NAME'];
+			if ( false !== stripos( $_SERVER['HTTP_REFERER'], $server_name ) ) {
+				exit( json_encode( array( 'error' => 'Invalid Reffer' ) ) );
+			}
+		} else {
+			exit(json_encode( array( 'error' => 'NO Reffer' ) ) );
+		} */
+
+		$this->load_admin_model();
+		$orders = $this->model_extension_module_knawat_dropshipping->get_sync_failed_orders();
+		if( !empty( $orders ) ){
+			$this->load->model("checkout/order");
+			try{
+				foreach( $orders as $order ){
+					$order = $this->model_checkout_order->getOrder($order['resource_id'] );
+					$orderdata = array( $order['order_id'], $order['order_status_id'] );
+					$this->order_changed( '', $orderdata );
+				}
+			}catch( Exception $e ){
+				exit(json_encode( array( 'error' => $e->getMessage() ) ) );
+			}
+
+		}
+		exit( json_encode( array( "status" => "success" ) ) );
 	}
 }

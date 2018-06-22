@@ -582,4 +582,15 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
 		}
 	}
 
+    /**
+     * Get Syncronization failed order.
+     */
+    public function get_sync_failed_orders(){
+        $get_sql = "SELECT `resource_id` FROM `" . DB_PREFIX . "knawat_metadata` WHERE  `meta_key` = 'knawat_sync_failed' AND `resource_type` = 'order'";
+        $result = $this->db->query( $get_sql );
+        if( isset( $result->num_rows ) && $result->num_rows > 0 && !empty( $result->rows ) ){
+            return $result->rows;
+        }
+        return false;
+    }
 }

@@ -94,10 +94,14 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 
 	public function index() {
 
+		if( !session_id() ){
+			session_start();
+		}
 		$this->load->language( $this->route );
 		$this->document->setTitle($this->language->get('heading_title'));
 
 		$this->load->model('setting/setting');
+		$this->load->model( $this->route );
 
 		// Validate and Submit Posts 
 		if ( ($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate() ) {
@@ -121,6 +125,12 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 			$data['error_warning'] = $this->error['warning'];
 		} else {
 			$data['error_warning'] = '';
+		}
+
+		// Check for order sync Warning.
+		$sync_failed_orders = $this->model_extension_module_knawat_dropshipping->get_sync_failed_orders();
+		if( !empty( $sync_failed_orders ) ){
+			$data['ordersync_warning'] = 1;
 		}
 
 		// Status Error
@@ -191,6 +201,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		);
 
 		$stores = $this->model_setting_store->getStores();
+
 		foreach ($stores as $store) {
 			$data['stores'][] = array(
 				'store_id' => $store['store_id'],
@@ -210,6 +221,10 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		}
 
 		$data['knawat_ajax_url'] = $this->url->link( $this->route .'/ajax_import', 'user_token=' . $this->session->data['user_token'], true);
+
+		$_SESSION['csrf_token'] = base64_encode(openssl_random_pseudo_bytes(32));
+		$data['csrf_token'] = $_SESSION['csrf_token'];
+		$data['knawat_ordersync_url'] = HTTP_CATALOG . 'index.php?route='. $this->route .'/sync_failed_order';
 
 		if ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] ) {
 			$data['knawat_ajax_loader']  = HTTPS_SERVER .'view/image/knawat_ajax_loader.gif';

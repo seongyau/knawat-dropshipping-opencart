@@ -26,7 +26,15 @@
             <i class="fa fa-exclamation-circle"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
-        {% endif %} {% if success %}
+        {% endif %}
+        {% if ordersync_warning %}
+        <div class="alert alert-warning alert-dismissible knawat_message">
+            <i class="fa fa-exclamation-circle"></i>
+            {{ warning_ordersync }} <a href="#" id="start_ordersync">{{ text_ordersync_botton }}</a>
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        {% endif %}
+        {% if success %}
         <div class="alert alert-success alert-dismissible">
             <i class="fa fa-check-circle"></i> {{ success }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -181,4 +189,44 @@
             jQuery('#run_import').show();
             jQuery('.ajax_import .import_inprocess').hide();
         }
+
+        var knawat_ordersync_url = '{{ knawat_ordersync_url }}';
+        $(document).ready(function () {
+            $.ajaxSetup({
+                headers : {
+                    'CsrfToken': '{{csrf_token}}'
+                }
+            });
+            $('#start_ordersync').on('click', function (e) {
+                $('#start_ordersync').html('{{text_syncing}}');
+                e.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: knawat_ordersync_url.replace(/&amp;/g, '&'),
+                    dataType: "json",
+                    success: function (response) {
+                        if ( 'success' === response.status) {
+                            jQuery(".knawat_message").remove();
+                            jQuery(".page-header .container-fluid").append(
+                                '<div class="knawat_message alert alert-success"><i class="fa fa-info-circle"></i> {{success_ordersync}}</div>'
+                            );
+                        }else{
+                            jQuery(".knawat_message").remove();
+                            if (typeof response.error !== 'undefined') {
+                                jQuery(".page-header .container-fluid").append( '<div class="knawat_message alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + response.error + '</div>' );
+                            }
+                        }
+                    }
+                }).fail(function (response) {
+                    if (window.console && window.console.log) {
+                        console.log(response);
+                    }
+                    jQuery(".knawat_message").remove();
+                    jQuery(".page-header .container-fluid").append(
+                        '<div class="knawat_message alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{error_wrong}}</div>'
+                    );
+                });
+
+            });
+        });
     </script>
