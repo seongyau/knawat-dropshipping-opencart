@@ -254,7 +254,11 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 	 */
 	private function is_knawat_product( $order_product ){
 		if( !empty( $order_product ) ){
-			$product_id = $order_product['product_id'];
+			if( is_array( $order_product ) ){
+				$product_id = $order_product['product_id'];
+			}else{
+				$product_id = $order_product;
+			}
 			if( !$product_id ){
 				return false;
 			}
@@ -290,8 +294,10 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 	 */
 	public function after_single_product(){
 		if( isset( $this->request->get['product_id'] ) && !empty( $this->request->get['product_id'] ) ){
-			$action_url = $this->url->link( $this->route.'/sync_product_by_id/&product_id='.(int)$this->request->get['product_id'] );
-			$this->curl_async( $action_url );
+			if( $this->is_knawat_product( $this->request->get['product_id'] ) ){
+				$action_url = $this->url->link( $this->route.'/sync_product_by_id/&product_id='.(int)$this->request->get['product_id'] );
+				$this->curl_async( $action_url );
+			}
 		}
 	}
 
@@ -300,8 +306,10 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 	 */
 	public function before_add_to_cart(){
 		if( isset( $this->request->post['product_id'] ) && !empty( $this->request->post['product_id'] ) ){
-			$action_url = $this->url->link( $this->route.'/sync_product_by_id/&product_id='.(int)$this->request->post['product_id'] );
-			$this->curl_async( $action_url );
+			if( $this->is_knawat_product( (int)$this->request->post['product_id'] ) ){
+				$action_url = $this->url->link( $this->route.'/sync_product_by_id/&product_id='.(int)$this->request->post['product_id'] );
+				$this->curl_async( $action_url );
+			}
 		}
 	}
 
@@ -309,7 +317,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url );
 		curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
-		curl_setopt($ch, CURLOPT_TIMEOUT_MS, 500 );
+		curl_setopt($ch, CURLOPT_TIMEOUT_MS, 1000 );
 		curl_exec($ch);
 		curl_close($ch);
 	}

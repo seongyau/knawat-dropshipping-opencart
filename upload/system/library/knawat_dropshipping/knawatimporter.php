@@ -219,7 +219,7 @@
                     return array( 'status' => 'fail', 'message' => 'Please provide product sku.' );
                 }
                 // API Wrapper class here.
-                $productdata->product = '';
+                $productdata = (object) array();
                 $productdata->product = $product[0];
                 break;
 
