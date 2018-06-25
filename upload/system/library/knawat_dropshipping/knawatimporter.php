@@ -102,6 +102,14 @@
             'updated'  => array(),
         );
 
+        if( $this->is_admin ){
+            $this->load->model('catalog/product');
+        }else{
+            $admin_dir = str_replace( 'system/', 'admin/', DIR_SYSTEM );
+            require_once $admin_dir . "model/catalog/product.php";
+            $this->model_catalog_product = new ModelCatalogProduct( $this->registry );
+        }
+
         // Sample Product till API start working.
         $product = '{
                   "sku": "46460300192382",
@@ -214,8 +222,16 @@
                 break;
 
             case 'single':
-                $sku = $this->params['sku'];
-                if( empty( $sku ) ){
+                $product_sku = '';
+                $product_id = $this->params['product_id'];
+                if( $product_id != '' ){
+                    $tempproduct = $this->model_catalog_product->getProduct( $product_id );
+                    $product_sku = isset( $tempproduct['sku'] ) ? $tempproduct['sku'] : '';
+                    if( empty( $product_sku ) ){
+                        $product_sku = isset( $tempproduct['model'] ) ? $tempproduct['model'] : '';
+                    }
+                }
+                if( empty( $product_sku ) ){
                     return array( 'status' => 'fail', 'message' => 'Please provide product sku.' );
                 }
                 // API Wrapper class here.
@@ -227,7 +243,7 @@
                 break;
         }
 
-        if( !empty( $productdata ) && isset( $productdata->products ) ){
+        if( !empty( $productdata ) && ( isset( $productdata->products ) || isset( $productdata->product ) ) ){
 
             $products = array();
             if ( 'single' === $this->import_type ) {

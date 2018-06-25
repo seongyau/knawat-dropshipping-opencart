@@ -332,19 +332,9 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		if( isset( $this->request->get['product_id'] ) && !empty( $this->request->get['product_id'] ) ){
 			$product_id = $this->request->get['product_id'];
 			if( !empty( $product_id ) ){
-				$this->load->model( 'catalog/product' );
-				$product = $this->model_catalog_product->getProduct( $product_id );
-				$product_sku = isset( $product['sku'] ) ? $product['sku'] : '';
-				if( empty( $product_sku ) ){
-					$product_sku = isset( $product['model'] ) ? $product['model'] : '';
-				}
-				if( empty( $product_sku ) ){
-					return;
-				}
-				
 				// import product
 				require_once( DIR_SYSTEM . 'library/knawat_dropshipping/knawatimporter.php' );
-				$knawatimporter = new KnawatImporter( $this->registry, array( 'sku'=> $product_sku ), 'single' );
+				$knawatimporter = new KnawatImporter( $this->registry, array( 'product_id'=> $product_id ), 'single' );
 				$import_results = $knawatimporter->import();
 			}
 		}
