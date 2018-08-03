@@ -28,6 +28,13 @@
     protected $import_type = 'full';
 
     /**
+     * API Wrapper Class instance
+     *
+     * @var string
+     */
+    protected $mp_api;
+
+    /**
      * Parameters which contains information regarding import.
      *
      * @var array
@@ -67,8 +74,12 @@
 
         $this->import_type = $import_type;
 
+        // Load API Wrapper.
+        require_once( DIR_SYSTEM . 'library/knawat_dropshipping/knawatmpapi.php' );
+        $this->mp_api = new KnawatMPAPI( $this->registry );
+
         $default_args = array(
-            'limit'             => 10,   // Limit for Fetch Products
+            'limit'             => 3,   // Limit for Fetch Products
             'page'              => 1,    // Page Number for API
             'force_update'      => false, // Whether to update existing items.
             'prevent_timeouts'  => true, // Check memory and time usage and abort if reaching limit.
@@ -110,115 +121,9 @@
             $this->model_catalog_product = new ModelCatalogProduct( $this->registry );
         }
 
-        // Sample Product till API start working.
-        $product = '{
-                  "sku": "46460300192382",
-                  "name": {
-                    "tr": "DAR KALIP PEMBE GÖMLEK",
-                    "ar": "قميص وردي قصير",
-                    "en": "Slimline Pink Shirt 2"
-                  },
-                  "description": {
-                    "tr":
-                      "%100 Pamuk&nbsp;<br>*Cep Detay <br>*Uzun Katlanabilir Kol&nbsp;<br>*Önden Düğmeli<br>*Yanları Düğmeli &nbsp;<br>*Dar Kalıp <br>*Boy Uzunluğu:63 cm<br>Numune Bedeni:&nbsp;36/S/1<br>Modelin Ölçüleri:&nbsp;Boy:1,76, Göğüs:86, Bel:60, Kalça: 91",
-                    "en":
-                      "<ul><li>100% Cotton</li><li>*Pocket Detailed</li><li>*Long Layered Sleeves</li><li>*Front Buttons</li><li>*Buttons on Sides</li><li>*Narrow Cut</li><li>*Length:63 cm</li><li>Sample Size: 36/S/1</li><li>Model\'s Measurements: Height:1,76, Chest:86, Waist:60, Hip: 91</li></ul>",
-                    "ar":
-                      "<ul><li>%100 قطن</li><li>مزين بجيب</li><li>بكم طويل قابل للازالة</li><li>بأزرار من الامام</li><li>بأزرار من الجوانب</li><li>سليم فت</li><li>الطول:63 سم</li><li>مقاس الجسم: 36/S/1</li><li>قياسات العارض: الطول:1,76, الصدر:86, الوسط:60, الخصر: 91</li></ul>"
-                  },
-                  "last_stock_check": "2018-03-15T06:53:06.949Z",
-                  "supplier": 1615,
-                  "categories": [
-                    {
-                      "id": 4856,
-                      "name": {
-                        "tr": "Outdoors / Kadın",
-                        "en": "Outdoors / Women2",
-                        "ar": "أوت دور / نسائي"
-                      }
-                    }
-                  ],
-                  "images": [
-                    "https://cdnp4.knawat.com/buyuk/788f8a17-d5d8-4ccb-b218-9e428b199228.jpg",
-                    "https://cdnp4.knawat.com/buyuk/d8f20963-1772-45af-849d-da84e66d9a95.jpg",
-                    "https://cdnp4.knawat.com/buyuk/fa36c9d4-51c4-434f-9ffd-94fb343ce0d8.jpg"
-                  ],
-                  "attributes": [
-                    {
-                      "id": 1,
-                      "name": {
-                        "tr": "Beden",
-                        "en": "Size",
-                        "ar": "مقاس"
-                      },
-                      "options": [
-                        { "tr": "M", "en": "M", "ar": "M" },
-                        { "tr": "XXL", "en": "XXL", "ar": "XXL" }
-                      ]
-                    },
-                    {
-                      "id": 2,
-                      "name": {
-                        "tr": "Renk",
-                        "en": "Color",
-                        "ar": "لون"
-                      },
-                      "options": [{ "tr": "Kırmızı", "en": "Red", "ar": "احمر" }]
-                    },
-                    {
-                      "id": 3,
-                      "name": "Material",
-                      "options": ["15% Cotton", "25% Polyester"]
-                    }
-                  ],
-                  "variations": [
-                    {
-                      "sku": "4646030019238-36",
-                      "price": 9.74,
-                      "market_price": 11.99,
-                      "weight": 0.5,
-                      "quantity": 10,
-                      "attributes": [
-                        {
-                          "id": 1,
-                          "name": {
-                            "tr": "Beden",
-                            "en": "Size3",
-                            "ar": "مقاس"
-                          },
-                          "option": { "tr": "M", "en": "M", "ar": "M" }
-                        }
-                      ]
-                    },
-                    {
-                      "sku": "4646030019238-38",
-                      "price": 9.74,
-                      "market_price": 11.99,
-                      "weight": 0.5,
-                      "quantity": 10,
-                      "barcode": null,
-                      "attributes": [
-                        {
-                          "id": 1,
-                          "name": {
-                            "tr": "Beden",
-                            "en": "Size3",
-                            "ar": "مقاس"
-                          },
-                          "option": { "tr": "XXL", "en": "XXL", "ar": "XXL" }
-                        }
-                      ]
-                    }
-                  ]
-                }';
-            $temp_product = json_decode( $product );
-            $product = array( $temp_product );
-
         switch ( $this->import_type ) {
             case 'full':
-                // API Wrapper class here.
-                $productdata = (object) array();
-                $productdata->products = $product;
+                $productdata = $this->mp_api->get( 'catalog/products/?limit='.$this->params['limit'].'&page='.$this->params['page'] );
                 break;
 
             case 'single':
@@ -235,8 +140,7 @@
                     return array( 'status' => 'fail', 'message' => 'Please provide product sku.' );
                 }
                 // API Wrapper class here.
-                $productdata = (object) array();
-                $productdata->product = $product[0];
+                $productdata = $this->mp_api->get( 'catalog/products/'. $product_sku );
                 break;
 
             default:
@@ -311,7 +215,7 @@
      */
     public function import_product( $product, $force_update = false ){
 
-        if( empty( $product ) ){
+        if( empty( $product ) || !isset( $product->sku ) ){
             return false;
         }
 
@@ -415,12 +319,20 @@
                 $lng_code = explode( '-', $lng['code'] );
                 $lng_code = $lng_code[0];
 
-                $name = (array)$product->name;
-                $description = (array)$product->description;
+                $name = $product->name;
+                $description = $product->description;
 
-                $product_name = array_key_exists( $lng_code, $name ) ? $name[$lng_code] : $name['en'];
-                $product_desc = array_key_exists( $lng_code, $description ) ? $description[$lng_code] : $description['en'];
-                $temp['product_description'][$lng['language_id']] = array(
+                /*$product_name = array_key_exists( $lng_code, $name ) ? $name[$lng_code] : $name['en'];
+                $product_desc = array_key_exists( $lng_code, $description ) ? $description[$lng_code] : $description['en'];*/
+                $product_name = isset( $name->$lng_code ) ? $name->$lng_code->text : '';
+                if( empty( $product_name )){
+                  $product_name = isset( $name->en ) ? $name->en->text : '';
+                }
+                $product_desc = isset( $description->$lng_code ) ? $description->$lng_code->text : '';
+                if( empty( $product_desc )){
+                  $product_desc = isset( $description->en ) ? $description->en->text : '';
+                }
+                 $temp['product_description'][$lng['language_id']] = array(
                     'name'              => $product_name,
                     'description'       => $product_desc,
                     'meta_title'        => $product_name,
@@ -470,7 +382,7 @@
 
         if( isset( $product->variations ) && !empty( $product->variations ) ){
             $quantity = 0;
-            $price = $product->variations[0]->price;
+            $price = $product->variations[0]->sale_price;
             $weight = $product->variations[0]->weight;
             foreach ( $product->variations as $vvalue ) {
                 $quantity += $vvalue->quantity;

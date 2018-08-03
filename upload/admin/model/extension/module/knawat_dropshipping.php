@@ -382,7 +382,7 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
                             $attributes[ $option_name ]['name'] = $attribute_names;
                             $attributes[ $option_name ]['values'][$option_value_name] = $attribute_options;
                         }
-                        $varients[ $option_name ][$option_value_name]['price'] = isset( $variation->price ) ? $variation->price : 0;
+                        $varients[ $option_name ][$option_value_name]['price'] = isset( $variation->sale_price ) ? $variation->sale_price : 0;
                         $varients[ $option_name ][$option_value_name]['quantity'] = isset( $variation->quantity ) ? $variation->quantity : 0;
                         $varients[ $option_name ][$option_value_name]['sku'] = isset( $variation->sku ) ? $variation->sku : '';
                     }
@@ -502,8 +502,11 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
             // Check for name in current language.
             $lng_code = explode( '-', $lng['code'] );
             $lng_code = $lng_code[0];
-
-            $attr_name = array_key_exists( $lng_code, $attribute_names ) ? $attribute_names[$lng_code] : $category['en'];
+            $attr_name = array_key_exists( $lng_code, $attribute_names ) ? $attribute_names[$lng_code] : $attribute_names['en'];
+            // if option name is blank then take a chance for TR.
+            if( empty( $attr_name ) ){
+                $attr_name = isset( $attribute_names['tr'] ) ? $attribute_names['tr'] : '';
+            }
             $temp['option_description'][$lng['language_id']] = array(
                 'name'              => $attr_name
             );
@@ -541,7 +544,12 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
             $lng_code = explode( '-', $lng['code'] );
             $lng_code = $lng_code[0];
 
+            $option_value_names = (array) $option_value_names;
             $value_name = array_key_exists( $lng_code, $option_value_names ) ? $option_value_names[$lng_code] : $option_value_names['en'];
+            // if option name is blank then take a chance for TR.
+            if( empty( $value_name ) ){
+                $value_name = isset( $option_value_names['tr'] ) ? $option_value_names['tr'] : '';
+            }
             $option_value['option_value_description'][$lng['language_id']] = array(
                 'name' => $value_name
             );
