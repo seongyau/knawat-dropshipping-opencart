@@ -192,6 +192,14 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		$order_string = base64_encode( $order['order_id'] .'___'. $order['customer_id'] .'___'. $order['date_added'] );
 		$mp_order['invoice_url'] = $site_url . 'index.php?route=' .$this->route . '/invoice&order_id='.$order_string;
 
+		// Setup Payment Method.
+		$payment_code = isset( $order['payment_code'] ) ? $order['payment_code'] : '';
+		$payment_method = isset( $order['payment_method'] ) ? $order['payment_method'] : '';
+		if( $payment_code != ''){
+			$payment_method = $payment_code . ' ('.$payment_method.')';
+		}
+		$mp_order['payment_method'] = $payment_method;
+
 		return $mp_order;
 	}
 
