@@ -85,6 +85,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 				$result = $knawatapi->put( 'orders/'.$knawat_order_id, $mp_order );
 				if( !empty( $result ) && isset( $result->status ) && 'success' === $result->status ){
 					$korder_id = $result->data->id;
+					$this->model_extension_module_knawat_dropshipping->delete_knawat_meta( $order_id, 'knawat_sync_failed', 'order' );
 				}else{
 					$failed = true;
 				}
