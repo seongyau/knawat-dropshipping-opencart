@@ -172,7 +172,7 @@
             curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 0 );
             curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0 );
         }
-        curl_setopt( $ch, CURLOPT_PROXY, "192.168.10.5:8080" ); // for local USE only remove it please
+        // curl_setopt( $ch, CURLOPT_PROXY, "192.168.10.5:8080" ); // for local USE only remove it please
         curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/json'
         ));
@@ -374,7 +374,7 @@
                 curl_setopt( $this->ch, CURLOPT_SSL_VERIFYPEER, 0 );
                 curl_setopt( $this->ch, CURLOPT_SSL_VERIFYHOST, 0 );
             }
-            curl_setopt( $this->ch, CURLOPT_PROXY, "192.168.10.5:8080" ); // for local USE only remove it please
+            // curl_setopt( $this->ch, CURLOPT_PROXY, "192.168.10.5:8080" ); // for local USE only remove it please
             curl_setopt( $this->ch, CURLOPT_HTTPHEADER, array(
                 'Authorization: Bearer ' . $this->access_token,
                 'Content-Type: application/json'

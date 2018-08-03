@@ -79,7 +79,7 @@
         $this->mp_api = new KnawatMPAPI( $this->registry );
 
         $default_args = array(
-            'limit'             => 3,   // Limit for Fetch Products
+            'limit'             => 10,   // Limit for Fetch Products
             'page'              => 1,    // Page Number for API
             'force_update'      => false, // Whether to update existing items.
             'prevent_timeouts'  => true, // Check memory and time usage and abort if reaching limit.
@@ -324,13 +324,13 @@
 
                 /*$product_name = array_key_exists( $lng_code, $name ) ? $name[$lng_code] : $name['en'];
                 $product_desc = array_key_exists( $lng_code, $description ) ? $description[$lng_code] : $description['en'];*/
-                $product_name = isset( $name->$lng_code ) ? $name->$lng_code->text : '';
+                $product_name = isset( $name->$lng_code ) ? $name->$lng_code : '';
                 if( empty( $product_name )){
-                  $product_name = isset( $name->en ) ? $name->en->text : '';
+                  $product_name = isset( $name->en ) ? $name->en : '';
                 }
-                $product_desc = isset( $description->$lng_code ) ? $description->$lng_code->text : '';
+                $product_desc = isset( $description->$lng_code ) ? $description->$lng_code : '';
                 if( empty( $product_desc )){
-                  $product_desc = isset( $description->en ) ? $description->en->text : '';
+                  $product_desc = isset( $description->en ) ? $description->en : '';
                 }
                  $temp['product_description'][$lng['language_id']] = array(
                     'name'              => $product_name,
@@ -463,7 +463,7 @@
                 curl_setopt( $ch, CURLOPT_BINARYTRANSFER,1 );
                 curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 0 );
                 curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0 );
-                curl_setopt( $ch, CURLOPT_PROXY, "192.168.10.5:8080" ); // for local USE only remove it please
+                // curl_setopt( $ch, CURLOPT_PROXY, "192.168.10.5:8080" ); // for local USE only remove it please
                 $raw_image_data = curl_exec( $ch );
                 curl_close ( $ch );
 
