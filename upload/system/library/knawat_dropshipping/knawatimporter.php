@@ -215,7 +215,7 @@
      */
     public function import_product( $product, $force_update = false ){
 
-        if( empty( $product ) || !isset( $product->sku ) ){
+        if( empty( $product ) || !isset( $product->sku ) || !isset($product->variations[0]->sale_price) ){
             return false;
         }
 
