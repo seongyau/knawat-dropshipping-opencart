@@ -267,6 +267,9 @@
     /**
      * Format product as per Opencart Syntax.
      */
+    /**
+     * Format product as per Opencart Syntax.
+     */
     public function format_product( $product, $update = false, $force_update = false ){
         if( empty( $product ) ){
             return $product;
@@ -314,6 +317,7 @@
                 $temp['product_store'] = $this->all_stores;
             }
 
+            $languageCodes = array();
             foreach ( $this->languages as $key => $lng ) {
                 // Check for name in current language.
                 $lng_code = explode( '-', $lng['code'] );
@@ -327,82 +331,68 @@
                 $product_name = isset( $name->$lng_code ) ? $name->$lng_code : '';
                 if( empty( $product_name )){
                   $product_name = isset( $name->en ) ? $name->en : '';
-                }
-                $product_desc = isset( $description->$lng_code ) ? $description->$lng_code : '';
-                if( empty( $product_desc )){
+              }
+              $product_desc = isset( $description->$lng_code ) ? $description->$lng_code : '';
+              if( empty( $product_desc )){
                   $product_desc = isset( $description->en ) ? $description->en : '';
-                }
-                 $temp['product_description'][$lng['language_id']] = array(
-                    'name'              => $product_name,
-                    'description'       => $product_desc,
-                    'meta_title'        => $product_name,
-                    'meta_description'  => '',
-                    'meta_keyword'      => '',
-                    'tag'               => '',
-                );
-            }
+              }
+              $temp['product_description'][$lng['language_id']] = array(
+                'name'              => $product_name,
+                'description'       => $product_desc,
+                'meta_title'        => $product_name,
+                'meta_description'  => '',
+                'meta_keyword'      => '',
+                'tag'               => '',
+            );
+              $languageCodes[] = $lng_code;
+              $languageIds[$lng_code] = $lng['language_id'];
 
-            /**
-             * Setup Product Category.
-             */
-            if( isset( $product->categories ) && !empty( $product->categories ) ) {
-                $new_cats = array();
-                foreach ( $product->categories as $category ) {
-                    if( isset( $category->name ) && !empty( $category->name ) ){
-                        $new_cats[] = (array)$category->name;
-                    }
-                }
-                $temp['product_category'] = $this->model_extension_module_knawat_dropshipping->parse_categories( $new_cats );
-            }
+          }
 
-            /**
-             * Setup Product Images.
-             */
-            if( isset( $product->images ) && !empty( $product->images ) ) {
-                $images = (array)$product->images;
-                $product_sku = isset( $product->sku ) ? $product->sku : '';
-
-                $product_images = $this->parse_product_images( $images, $product_sku );
-                if( !empty( $product_images ) ){
-                    $temp['image'] = $product_images[0];
-                    unset( $product_images[0] );
-                    if( count( $product_images ) > 0 ){
-                        foreach ($product_images as $pimage ) {
-                            $temp_image['image'] = $pimage;
-                            $temp_image['sort_order'] = '0';
-                            $temp['product_image'][] = $temp_image;
-                        }
-                    }
-                }
-            }
-
-        }else{
-            $temp = array();
-        }
-
-        if( isset( $product->variations ) && !empty( $product->variations ) ){
-            $quantity = 0;
-            $price = $product->variations[0]->sale_price;
-            $weight = $product->variations[0]->weight;
-            foreach ( $product->variations as $vvalue ) {
-                $quantity += $vvalue->quantity;
-            }
-            $temp['price']      = $price;
-            $temp['quantity']   = $quantity;
-            $temp['weight']     = $weight;
-            if( $quantity > 0 ){
-                $temp['stock_status_id'] = '7';
+          /*load model*/
+          if( $this->is_admin ){
+            $this->load->model('catalog/attribute');
             }else{
-                $temp['stock_status_id'] = '5';
+                    $admin_dir = str_replace( 'system/', 'admin/', DIR_SYSTEM );
+                    require_once $admin_dir . "model/catalog/attribute.php";
+                    $this->model_catalog_attribute = new ModelCatalogAttribute( $this->registry );
+            }
+        /*load model*/
+        /*variation array*/
+        if (isset($product->variations[0]->attributes) && !empty($product->variations[0]->attributes)) {
+            $attribute = $product->variations[0]->attributes;
+            if($attribute[0]){
+                if (isset($attribute[0]->name) || !empty($attribute[0]->name) ) {
+                    $variationdata = (array)$attribute[0]->name;
+                }
+            }
+        }
+        /*variation array*/
+        /*attribute code*/
+        if (isset($product->attributes) && !empty($product->attributes)) {
+            $subArray = array();
+            foreach ($product->attributes as $key => $attribute) {
+              $attributeNames =  (array)$attribute->name;
+              if($variationdata != $attributeNames){
+                foreach ($attributeNames as $key => $value) {
+                    if(in_array($key, $languageCodes)){
+                        $languageId = $languageIds[$key];
+                        $newArray[$languageId] = array(
+                            'language_id' => $languageId,
+                            'name'  => $value
+                        );
+                                       
+                    }                           
+
+                }
+
+                $subArray['attribute_group_id'] = 4;
+                $subArray['sort_order'] = 2;
+                $subArray['attribute_description'] = $newArray; 
+                $this->model_catalog_attribute->addAttribute($subArray);         
             }
 
-            $temp['product_option'] = $this->model_extension_module_knawat_dropshipping->parse_product_options( $product->variations, $price );
         }
-
-        ///////////////////////////////////
-        /////// @TODO Custom Fields ///////
-        ///////////////////////////////////
-        return $temp;
     }
 
     /**

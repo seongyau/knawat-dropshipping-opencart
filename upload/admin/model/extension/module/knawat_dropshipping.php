@@ -601,4 +601,13 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
         }
         return false;
     }
+    /*get attribute id by name*/
+    public function getAttributeData($attribute_name) {
+        $get_sql = "SELECT `attribute_id` FROM `" . DB_PREFIX . "attribute_description` WHERE  `name` = '" . $this->db->escape($attribute_name) . "'";
+        $result = $this->db->query( $get_sql );
+        if( isset( $result->num_rows ) && $result->num_rows > 0 && !empty( $result->rows ) ){
+            return $result->row['attribute_id'];
+        }
+        return false;
+    }
 }
