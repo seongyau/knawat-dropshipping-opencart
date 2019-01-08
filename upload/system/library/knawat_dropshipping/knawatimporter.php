@@ -5,7 +5,7 @@
  * @link       http://knawat.com/
  * @since      1.0.0
  * @category   Class
- * @author 	   Dharmesh Patel
+ * @author     Dharmesh Patel
  */
 
  class KnawatImporter{
@@ -357,42 +357,130 @@
                     require_once $admin_dir . "model/catalog/attribute.php";
                     $this->model_catalog_attribute = new ModelCatalogAttribute( $this->registry );
             }
-        /*load model*/
-        /*variation array*/
-        if (isset($product->variations[0]->attributes) && !empty($product->variations[0]->attributes)) {
-            $attribute = $product->variations[0]->attributes;
-            if($attribute[0]){
-                if (isset($attribute[0]->name) || !empty($attribute[0]->name) ) {
-                    $variationdata = (array)$attribute[0]->name;
+            /*load model*/
+            /*variation array*/
+            if (isset($product->variations[0]->attributes) && !empty($product->variations[0]->attributes)) {
+                $attribute = $product->variations[0]->attributes;
+                if($attribute[0]){
+                    if (isset($attribute[0]->name) || !empty($attribute[0]->name) ) {
+                        $variationdata = (array)$attribute[0]->name;
+                    }
                 }
             }
-        }
-        /*variation array*/
-        /*attribute code*/
-        if (isset($product->attributes) && !empty($product->attributes)) {
-            $subArray = array();
+            /*variation array*/
+            /*attribute code*/
+            if (isset($product->attributes) && !empty($product->attributes)) {
+                $subArray = array();
+                foreach ($product->attributes as $key => $attribute) {
+                    $attributeNames =  (array)$attribute->name;
+                        if($variationdata != $attributeNames){
+                            foreach ($attributeNames as $key => $value) {
+                                if(in_array($key, $languageCodes)){
+                                    $attributeId = $this->model_extension_module_knawat_dropshipping->getAttributeData($value);
+                                    if(!$attributeId){
+                                        $languageId = $languageIds[$key];
+                                        $newArray[$languageId] = array(
+                                        'language_id' => $languageId,
+                                        'name'  => $value
+                                        );
+                                    }               
+                                }                           
+                            }
+                            if(!empty($newArray)){
+                                $subArray['attribute_group_id'] = 4;
+                                $subArray['sort_order'] = 2;
+                                $subArray['attribute_description'] = $newArray; 
+                                $this->model_catalog_attribute->addAttribute($subArray);         
+                            }
+                        }
+                    }
+                }
+                /*attribute code*/
+                /*product code*/
             foreach ($product->attributes as $key => $attribute) {
-              $attributeNames =  (array)$attribute->name;
-              if($variationdata != $attributeNames){
-                foreach ($attributeNames as $key => $value) {
-                    if(in_array($key, $languageCodes)){
-                        $languageId = $languageIds[$key];
-                        $newArray[$languageId] = array(
-                            'language_id' => $languageId,
-                            'name'  => $value
-                        );
-                                       
-                    }                           
+                $attributeNames =  (array)$attribute->name;
+                    if($variationdata != $attributeNames){
+                        $productAttributes = array();
+                            foreach ($attributeNames as $key => $value) {
+                                if(in_array($key, $languageCodes)){
+                                    $languageId = $languageIds[$key];
+                                    $options = $attribute->options[0]->$key;
+                                    $attributeId = $this->model_extension_module_knawat_dropshipping->getAttributeData($value);
+                                    $productAttributes[$languageId] = array(
+                                        'text' => $options
+                                    );
+                                    $attributeId = (int) $attributeId;
+                                    $temp['product_attribute'][] = array(
+                                        'attribute_id'  => $attributeId,
+                                        'product_attribute_description' => $productAttributes
+                                    );
+                                }
+                            }
+                        }
+                    }
+            /*product code end*/
 
+            /**
+             * Setup Product Category.
+             */
+            if( isset( $product->categories ) && !empty( $product->categories ) ) {
+                $new_cats = array();
+                foreach ( $product->categories as $category ) {
+                    if( isset( $category->name ) && !empty( $category->name ) ){
+                        $new_cats[] = (array)$category->name;
+                    }
                 }
-
-                $subArray['attribute_group_id'] = 4;
-                $subArray['sort_order'] = 2;
-                $subArray['attribute_description'] = $newArray; 
-                $this->model_catalog_attribute->addAttribute($subArray);         
+                $temp['product_category'] = $this->model_extension_module_knawat_dropshipping->parse_categories( $new_cats );
             }
 
+            /**
+             * Setup Product Images.
+             */
+            if( isset( $product->images ) && !empty( $product->images ) ) {
+                $images = (array)$product->images;
+                $product_sku = isset( $product->sku ) ? $product->sku : '';
+
+                $product_images = $this->parse_product_images( $images, $product_sku );
+                if( !empty( $product_images ) ){
+                    $temp['image'] = $product_images[0];
+                    unset( $product_images[0] );
+                    if( count( $product_images ) > 0 ){
+                        foreach ($product_images as $pimage ) {
+                            $temp_image['image'] = $pimage;
+                            $temp_image['sort_order'] = '0';
+                            $temp['product_image'][] = $temp_image;
+                        }
+                    }
+                }
+            }
+
+        }else{
+            $temp = array();
         }
+
+        if( isset( $product->variations ) && !empty( $product->variations ) ){
+            $quantity = 0;
+            $price = $product->variations[0]->sale_price;
+            $weight = $product->variations[0]->weight;
+            foreach ( $product->variations as $vvalue ) {
+                $quantity += $vvalue->quantity;
+            }
+            $temp['price']      = $price;
+            $temp['quantity']   = $quantity;
+            $temp['weight']     = $weight;
+            if( $quantity > 0 ){
+                $temp['stock_status_id'] = '7';
+            }else{
+                $temp['stock_status_id'] = '5';
+            }
+
+            $temp['product_option'] = $this->model_extension_module_knawat_dropshipping->parse_product_options( $product->variations, $price );
+        }
+
+        ///////////////////////////////////
+        /////// @TODO Custom Fields ///////
+        ///////////////////////////////////
+        return $temp;
     }
 
     /**
