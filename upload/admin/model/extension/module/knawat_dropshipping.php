@@ -311,7 +311,6 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
      */
     public function get_category_id_by_name( $cat_name, $parent_id = 0) {
 
-        $cat_name = htmlspecialchars($cat_name);
         $sql = "SELECT cd.* FROM " . DB_PREFIX . "category_description cd";
 
         if($parent_id > 0){
