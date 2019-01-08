@@ -461,11 +461,17 @@
         if( isset( $product->variations ) && !empty( $product->variations ) ){
             $quantity = 0;
             $price = $product->variations[0]->sale_price;
+            if( isset( $product->variations[0]->market_price ) ){
+                $market_price = $product->variations[0]->market_price;
+            }
+            if( empty( $market_price ) ){
+                $market_price = $price;
+            }
             $weight = $product->variations[0]->weight;
             foreach ( $product->variations as $vvalue ) {
                 $quantity += $vvalue->quantity;
             }
-            $temp['price']      = $price;
+            $temp['price']      = $market_price;
             $temp['quantity']   = $quantity;
             $temp['weight']     = $weight;
             if( $quantity > 0 ){
@@ -473,7 +479,17 @@
             }else{
                 $temp['stock_status_id'] = '5';
             }
-
+            if(!empty($price)){
+                if($price < $market_price){
+                    $temp['product_special'][] = array(
+                        'customer_group_id' => 1,
+                        'price'  => $price,
+                        'priority' => 1,
+                        'date_start' => 0000-00-00,
+                        'date_end' => 0000-00-00
+                    );    
+                }
+            }
             $temp['product_option'] = $this->model_extension_module_knawat_dropshipping->parse_product_options( $product->variations, $price );
         }
 
