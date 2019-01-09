@@ -155,7 +155,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		$korder_products = $this->get_knawat_order_product( $order_products, $is_update );
 
 		$mp_order = array(
-			'id'	=> $order['order_id'],
+			'id'	=> (string)$order['order_id'],
 			'status'=> strtolower( $order['order_status'] ),
 			'items'	=> $korder_products,
 		);
