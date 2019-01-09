@@ -67,9 +67,9 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		if( $order_status != '' ){
 			$order['order_status'] = $order_status;
 		}
-
-		$mp_order = $this->format_order( $order, $order_products, $is_update );
 		
+		$mp_order = $this->format_order( $order, $order_products, $is_update );
+
 		if( empty( $mp_order ) ){
 			$this->log->write("Failed to format Order as per MP API at send order to knawat.com, format_order() failed. order_id:" . $order_id);
 			return false;
@@ -83,16 +83,14 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 			$failed_message = 'Something went wrong during order update to knawat.com';
 			$whilelisted_status = [ 'Pending', 'Processing', 'Canceled' ];
 			if (!in_array($order_status, $whilelisted_status)) {
-                    $failed = true;
+                    return false;
                 }
 			try{
-				if(!$failed){
 				$result = $knawatapi->put( 'orders/'.$knawat_order_id, $mp_order );
 				if( !empty( $result ) && isset( $result->status ) && 'success' === $result->status ){
 					$korder_id = $result->data->id;
 					$this->model_extension_module_knawat_dropshipping->delete_knawat_meta( $order_id, 'knawat_sync_failed', 'order' );
 					}
-				}
 				else{
 					$failed = true;
 				}
@@ -110,10 +108,9 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 			$failed_message = 'Something went wrong during order create on knawat.com';
 			$push_status = 'Processing';
 			if ($push_status != $order_status) {
-				$failed = true;
+				return false;
 			}
 			try{
-				if(!$failed){	
 				$result = $knawatapi->post( 'orders', $mp_order );
 				if( !empty( $result ) && isset( $result->status ) && 'success' === $result->status ){
 					$korder_id = $result->data->id;
@@ -122,7 +119,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 
 					$this->model_extension_module_knawat_dropshipping->delete_knawat_meta( $order_id, 'knawat_sync_failed', 'order' );
 					}
-				}else{
+				else{
 					$failed = true;
 				}
 			}catch( Exception $e ){
