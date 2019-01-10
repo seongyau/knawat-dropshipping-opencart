@@ -337,7 +337,7 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
      * Create New option or option value if not exists.
      *
      */
-    public function parse_product_options( $variations = array(), $price ){
+    public function parse_product_options( $variations = array(), $price,$update ){
         if( empty( $variations ) ){
             return array();
         }
@@ -350,9 +350,9 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
             $attributes = array();
             $varients = array();
             foreach ( $variations as $variation ) {
-
+            if(($variation->quantity > 0 && !$update) || ($update)){
                 if( isset( $variation->attributes ) && !empty( $variation->attributes ) ){
-                    foreach ( $variation->attributes as $attribute ) {
+                        foreach ( $variation->attributes as $attribute ) {
 
                         $attribute_names = (array) $attribute->name;
                         $attribute_options = (array) $attribute->option;
@@ -387,7 +387,8 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
                     }
                 }
             }
-
+        }
+               
             if( !empty( $attributes ) ){
                 foreach ($attributes as $key => $attribute ) {
 
@@ -567,27 +568,27 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
     }
 
     public function get_order_status_name( $order_status_id ) {
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_status WHERE order_status_id = '" . (int)$order_status_id . "' AND language_id = '" . (int)$this->default_language_id . "'");
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_status WHERE order_status_id = '" . (int)$order_status_id . "' AND language_id = '" . (int)$this->default_language_id . "'");
 
         if( !empty( $query->row ) ){
             return $query->row['name'];
         }
-		return false;
+        return false;
     }
 
     public function edit_setting( $code, $data, $store_id = 0 ) {
-		$this->db->query("DELETE FROM `" . DB_PREFIX . "setting` WHERE store_id = '" . (int)$store_id . "' AND `code` = '" . $this->db->escape($code) . "'");
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "setting` WHERE store_id = '" . (int)$store_id . "' AND `code` = '" . $this->db->escape($code) . "'");
 
-		foreach ($data as $key => $value) {
-			if (substr($key, 0, strlen($code)) == $code) {
-				if (!is_array($value)) {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '" . (int)$store_id . "', `code` = '" . $this->db->escape($code) . "', `key` = '" . $this->db->escape($key) . "', `value` = '" . $this->db->escape($value) . "'");
-				} else {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '" . (int)$store_id . "', `code` = '" . $this->db->escape($code) . "', `key` = '" . $this->db->escape($key) . "', `value` = '" . $this->db->escape(json_encode($value, true)) . "', serialized = '1'");
-				}
-			}
-		}
-	}
+        foreach ($data as $key => $value) {
+            if (substr($key, 0, strlen($code)) == $code) {
+                if (!is_array($value)) {
+                    $this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '" . (int)$store_id . "', `code` = '" . $this->db->escape($code) . "', `key` = '" . $this->db->escape($key) . "', `value` = '" . $this->db->escape($value) . "'");
+                } else {
+                    $this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '" . (int)$store_id . "', `code` = '" . $this->db->escape($code) . "', `key` = '" . $this->db->escape($key) . "', `value` = '" . $this->db->escape(json_encode($value, true)) . "', serialized = '1'");
+                }
+            }
+        }
+    }
 
     /**
      * Get Syncronization failed order.

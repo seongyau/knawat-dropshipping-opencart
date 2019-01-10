@@ -490,9 +490,11 @@
                     );    
                 }
             }
-            $temp['product_option'] = $this->model_extension_module_knawat_dropshipping->parse_product_options( $product->variations, $price );
+            $temp['product_option'] = $this->model_extension_module_knawat_dropshipping->parse_product_options( $product->variations, $price,$update );
         }
-
+         if(empty($temp['product_option']) && !$update){
+            return false;
+           }
         ///////////////////////////////////
         /////// @TODO Custom Fields ///////
         ///////////////////////////////////
