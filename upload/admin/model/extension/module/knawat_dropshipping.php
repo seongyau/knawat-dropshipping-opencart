@@ -353,13 +353,14 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
             if(($variation->quantity > 0 && !$update) || ($update)){
                 if( isset( $variation->attributes ) && !empty( $variation->attributes ) ){
                         foreach ( $variation->attributes as $attribute ) {
-
                         $attribute_names = (array) $attribute->name;
                         $attribute_options = (array) $attribute->option;
-
                         $option_name = array_key_exists( $this->default_language, $attribute_names ) ? $attribute_names[$this->default_language] : $attribute_names['en'];
-                        $option_value_name = array_key_exists( $this->default_language, $attribute_options ) ? $attribute_options[$this->default_language] : $attribute_options['en'];
-
+                        if(array_key_exists( $this->default_language, $attribute_options )){
+                            $option_value_name = $attribute_options[$this->default_language];
+                        }else if(!empty($attribute_options['en'])){
+                            $option_value_name = $attribute_options['en'];     
+                        }
                         // if option name is blank then take a chance for TR.
                         if( empty( $option_name ) ){
                             $option_name = isset( $attribute_names['tr'] ) ? $attribute_names['tr'] : '';
@@ -387,8 +388,7 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
                     }
                 }
             }
-        }
-               
+        }    
             if( !empty( $attributes ) ){
                 foreach ($attributes as $key => $attribute ) {
 
@@ -462,8 +462,6 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
         }
         return $product_options;
     }
-
-
     /**
      * Get Option ID by name
      */

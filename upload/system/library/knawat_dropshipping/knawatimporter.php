@@ -105,14 +105,21 @@
      *  Main import function.
      */
     public function import(){
-
+        //error_reporting(0);
         $this->start_time = time();
         $data             = array(
             'imported' => array(),
             'failed'   => array(),
             'updated'  => array(),
         );
-
+        /*add start time */
+        $start_time = $this->model_extension_module_knawat_dropshipping->get_knawat_meta('8158', 'time','start_time');
+        if(empty($start_time)){
+            $this->model_extension_module_knawat_dropshipping->add_knawat_meta('8158', 'time',time(), 'start_time' );
+        }else{
+            $this->model_extension_module_knawat_dropshipping->update_knawat_meta('8158', 'time',time(), 'start_time' );
+        }
+        /*add start time*/
         if( $this->is_admin ){
             $this->load->model('catalog/product');
         }else{
@@ -123,7 +130,11 @@
 
         switch ( $this->import_type ) {
             case 'full':
-                $productdata = $this->mp_api->get( 'catalog/products/?limit='.$this->params['limit'].'&page='.$this->params['page'] );
+                $lastUpdated = $this->model_extension_module_knawat_dropshipping->get_knawat_meta('8159', 'time','knawat_last_imported');
+                if (empty($lastUpdated)) {
+                    $lastUpdated = 0;
+                }
+                $productdata = $this->mp_api->get( 'catalog/products/?limit='.$this->params['limit'].'&page='.$this->params['page']. '&lastupdate='.$lastUpdated );
                 break;
 
             case 'single':
@@ -194,8 +205,6 @@
 
             $products_total = count( $products );
             if( $products_total === 0 ){
-                $this->params['is_complete'] = true;
-            }elseif( $products_total < $this->params['limit'] ){
                 $this->params['is_complete'] = true;
             }else{
                 $this->params['is_complete'] = false;

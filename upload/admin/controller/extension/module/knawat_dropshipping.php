@@ -306,17 +306,27 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		}
 
 		$knawatimporter = new KnawatImporter( $this->registry, $item );
+
 		$import_data = $knawatimporter->import();
 		
 		$params = $knawatimporter->get_import_params();
 
 		$item = $params;
+
 		if( true == $params['batch_done'] ){
 			$item['page']  = $params['page'] + 1;
 		}else{
 			$item['page']  = $params['page'];
 		}
-
+		/* add last updated time*/
+		$start_time = $this->model_extension_module_knawat_dropshipping->get_knawat_meta('8158', 'time','start_time');
+		if($item['is_complete'] === true){
+			if( empty($start_time) ){
+				$start_time = time();
+			}
+			$this->model_extension_module_knawat_dropshipping->update_knawat_meta('8159', 'time',$start_time, 'knawat_last_imported' );
+		}
+		/* add last updated time*/
 		$item['imported'] += count( $import_data['imported'] );
 		$item['failed']   += count( $import_data['failed'] );
 		$item['updated']  += count( $import_data['updated'] );
