@@ -8,7 +8,7 @@
  * @author     Dharmesh Patel
  */
 
- class KnawatImporter{
+class KnawatImporter{
 
     private $registry;
     private $codename = 'knawat_dropshipping';
@@ -130,32 +130,32 @@
 
         switch ( $this->import_type ) {
             case 'full':
-                $lastUpdated = $this->model_extension_module_knawat_dropshipping->get_knawat_meta('8159', 'time','knawat_last_imported');
-                if (empty($lastUpdated)) {
-                    $lastUpdated = 0;
-                }
-                $productdata = $this->mp_api->get( 'catalog/products/?limit='.$this->params['limit'].'&page='.$this->params['page']. '&lastupdate='.$lastUpdated );
-                break;
+            $lastUpdated = $this->model_extension_module_knawat_dropshipping->get_knawat_meta('8159', 'time','knawat_last_imported');
+            if (empty($lastUpdated)) {
+                $lastUpdated = 0;
+            }
+            $productdata = $this->mp_api->get( 'catalog/products/?limit='.$this->params['limit'].'&page='.$this->params['page']. '&lastupdate='.$lastUpdated );
+            break;
 
             case 'single':
-                $product_sku = '';
-                $product_id = $this->params['product_id'];
-                if( $product_id != '' ){
-                    $tempproduct = $this->model_catalog_product->getProduct( $product_id );
-                    $product_sku = isset( $tempproduct['sku'] ) ? $tempproduct['sku'] : '';
-                    if( empty( $product_sku ) ){
-                        $product_sku = isset( $tempproduct['model'] ) ? $tempproduct['model'] : '';
-                    }
-                }
+            $product_sku = '';
+            $product_id = $this->params['product_id'];
+            if( $product_id != '' ){
+                $tempproduct = $this->model_catalog_product->getProduct( $product_id );
+                $product_sku = isset( $tempproduct['sku'] ) ? $tempproduct['sku'] : '';
                 if( empty( $product_sku ) ){
-                    return array( 'status' => 'fail', 'message' => 'Please provide product sku.' );
+                    $product_sku = isset( $tempproduct['model'] ) ? $tempproduct['model'] : '';
                 }
+            }
+            if( empty( $product_sku ) ){
+                return array( 'status' => 'fail', 'message' => 'Please provide product sku.' );
+            }
                 // API Wrapper class here.
-                $productdata = $this->mp_api->get( 'catalog/products/'. $product_sku );
-                break;
+            $productdata = $this->mp_api->get( 'catalog/products/'. $product_sku );
+            break;
 
             default:
-                break;
+            break;
         }
 
         if( !empty( $productdata ) && ( isset( $productdata->products ) || isset( $productdata->product ) ) ){
@@ -235,7 +235,7 @@
             require_once $admin_dir . "model/catalog/product.php";
             $this->model_catalog_product = new ModelCatalogProduct( $this->registry );
         }
-
+        
         /* Check for Existing Product */
         $product_id = $this->model_extension_module_knawat_dropshipping->get_product_id_by_model( $product->sku );
 
@@ -357,77 +357,102 @@
               $languageIds[$lng_code] = $lng['language_id'];
 
           }
-
-          /*load model*/
-          if( $this->is_admin ){
+          /*attribute group code*/
+          if(!empty($languageCodes)){
+            $language_code = $languageCodes[0];
+            $attributeGrouplanguageId = $languageIds[$language_code];
+        }
+        /*load model*/
+        if( $this->is_admin ){
+            $this->load->model('catalog/attribute_group');
+        }else{
+            $admin_dir = str_replace( 'system/', 'admin/', DIR_SYSTEM );
+            require_once $admin_dir . "model/catalog/attribute_group.php";
+            $this->model_catalog_attribute_group = new ModelCatalogAttributeGroup( $this->registry );
+        }
+        /*load model*/
+        $attribute_group_id = $this->model_extension_module_knawat_dropshipping->getAttributeGroup('knawat');
+        if(!$attribute_group_id){
+            /*add attribute set*/
+            $attributeGroupArray = array();
+            $attributeGroupArray['sort_order'] = 2;
+            $attributeGroupArray['attribute_group_description'][$attributeGrouplanguageId] = array(
+                'name'              => 'Knawat'
+            );
+            $attribute_group_id = $this->model_catalog_attribute_group->addAttributeGroup($attributeGroupArray); 
+        }
+        /*add attribute set*/
+        /*attribute group code*/
+        /*load model*/
+        if( $this->is_admin ){
             $this->load->model('catalog/attribute');
-            }else{
-                    $admin_dir = str_replace( 'system/', 'admin/', DIR_SYSTEM );
-                    require_once $admin_dir . "model/catalog/attribute.php";
-                    $this->model_catalog_attribute = new ModelCatalogAttribute( $this->registry );
-            }
-            /*load model*/
-            /*variation array*/
-            if (isset($product->variations[0]->attributes) && !empty($product->variations[0]->attributes)) {
-                $attribute = $product->variations[0]->attributes;
-                if($attribute[0]){
-                    if (isset($attribute[0]->name) || !empty($attribute[0]->name) ) {
-                        $variationdata = (array)$attribute[0]->name;
-                    }
+        }else{
+            $admin_dir = str_replace( 'system/', 'admin/', DIR_SYSTEM );
+            require_once $admin_dir . "model/catalog/attribute.php";
+            $this->model_catalog_attribute = new ModelCatalogAttribute( $this->registry );
+        }
+        /*load model*/
+        /*variation array*/
+        if (isset($product->variations[0]->attributes) && !empty($product->variations[0]->attributes)) {
+            $attribute = $product->variations[0]->attributes;
+            if($attribute[0]){
+                if (isset($attribute[0]->name) || !empty($attribute[0]->name) ) {
+                    $variationdata = (array)$attribute[0]->name;
                 }
             }
-            /*variation array*/
-            /*attribute code*/
-            if (isset($product->attributes) && !empty($product->attributes)) {
-                $subArray = array();
-                foreach ($product->attributes as $key => $attribute) {
-                    $attributeNames =  (array)$attribute->name;
-                        if($variationdata != $attributeNames){
-                            foreach ($attributeNames as $key => $value) {
-                                if(in_array($key, $languageCodes)){
-                                    $attributeId = $this->model_extension_module_knawat_dropshipping->getAttributeData($value);
-                                    if(!$attributeId){
-                                        $languageId = $languageIds[$key];
-                                        $newArray[$languageId] = array(
-                                        'language_id' => $languageId,
-                                        'name'  => $value
-                                        );
-                                    }               
-                                }                           
-                            }
-                            if(!empty($newArray)){
-                                $subArray['attribute_group_id'] = 4;
-                                $subArray['sort_order'] = 2;
-                                $subArray['attribute_description'] = $newArray; 
-                                $this->model_catalog_attribute->addAttribute($subArray);         
-                            }
-                        }
-                    }
-                }
-                /*attribute code*/
-                /*product code*/
+        }
+        /*variation array*/
+        /*attribute code*/
+        if (isset($product->attributes) && !empty($product->attributes)) {
+            $subArray = array();
             foreach ($product->attributes as $key => $attribute) {
                 $attributeNames =  (array)$attribute->name;
-                    if($variationdata != $attributeNames){
-                        $productAttributes = array();
-                            foreach ($attributeNames as $key => $value) {
-                                if(in_array($key, $languageCodes)){
-                                    $languageId = $languageIds[$key];
-                                    $options = $attribute->options[0]->$key;
-                                    $attributeId = $this->model_extension_module_knawat_dropshipping->getAttributeData($value);
-                                    $productAttributes[$languageId] = array(
-                                        'text' => $options
-                                    );
-                                    $attributeId = (int) $attributeId;
-                                    $temp['product_attribute'][] = array(
-                                        'attribute_id'  => $attributeId,
-                                        'product_attribute_description' => $productAttributes
-                                    );
-                                }
-                            }
-                        }
+                if($variationdata != $attributeNames){
+                    foreach ($attributeNames as $key => $value) {
+                        if(in_array($key, $languageCodes)){
+                            $attributeId = $this->model_extension_module_knawat_dropshipping->getAttributeData($value);
+                            if(!$attributeId){
+                                $languageId = $languageIds[$key];
+                                $newArray[$languageId] = array(
+                                    'language_id' => $languageId,
+                                    'name'  => $value
+                                );
+                            }               
+                        }                           
                     }
-            /*product code end*/
+                    if(!empty($newArray)){
+                        $subArray['attribute_group_id'] = $attribute_group_id;
+                        $subArray['sort_order'] = 2;
+                        $subArray['attribute_description'] = $newArray; 
+                        $this->model_catalog_attribute->addAttribute($subArray);         
+                    }
+                }
+            }
+        }
+        /*attribute code*/
+        /*product code*/
+        foreach ($product->attributes as $key => $attribute) {
+            $attributeNames =  (array)$attribute->name;
+            if($variationdata != $attributeNames){
+                $productAttributes = array();
+                foreach ($attributeNames as $key => $value) {
+                    if(in_array($key, $languageCodes)){
+                        $languageId = $languageIds[$key];
+                        $options = $attribute->options[0]->$key;
+                        $attributeId = $this->model_extension_module_knawat_dropshipping->getAttributeData($value);
+                        $productAttributes[$languageId] = array(
+                            'text' => $options
+                        );
+                        $attributeId = (int) $attributeId;
+                        $temp['product_attribute'][] = array(
+                            'attribute_id'  => $attributeId,
+                            'product_attribute_description' => $productAttributes
+                        );
+                    }
+                }
+            }
+        }
+        /*product code end*/
 
             /**
              * Setup Product Category.
@@ -501,9 +526,9 @@
             }
             $temp['product_option'] = $this->model_extension_module_knawat_dropshipping->parse_product_options( $product->variations, $price,$update );
         }
-         if(empty($temp['product_option']) && !$update){
+        if(empty($temp['product_option']) && !$update){
             return false;
-           }
+        }
         ///////////////////////////////////
         /////// @TODO Custom Fields ///////
         ///////////////////////////////////
@@ -596,4 +621,4 @@
         return $this->params;
     }
 
- }
+}
