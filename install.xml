@@ -10,13 +10,14 @@
         <operation>
             <search><![CDATA[ return $this->load->view('common/column_left', $data); ]]></search>
             <add position="before"><![CDATA[
+                $this->load->language('extension/module/knawat_dropshipping');
                 $this->load->model('setting/extension');
                 $extensions = $this->model_setting_extension->getInstalled('module');
                 if( in_array( 'knawat_dropshipping', $extensions ) ){
                     $data['menus'][] = array(
                         'id'       => 'menu-knawat-dropshipping',
                         'icon'     => 'fa-truck', 
-                        'name'     => "Knawat Dropshipping",
+                        'name'     => $this->language->get("text_knawat_menu"),
                         'href'     => $this->url->link('extension/module/knawat_dropshipping', 'user_token=' . $this->session->data['user_token'], true),
                         'children' => array()
                     );

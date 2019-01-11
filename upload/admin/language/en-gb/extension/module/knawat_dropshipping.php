@@ -45,3 +45,4 @@ $_['error_wrong'] 	        = '<strong>Error:</strong> Something went wrong. Plea
 // Success
 $_['success_ajaximport'] 	= '<strong>Success:</strong> Products are imported successfully.';
 $_['success_ordersync'] 	= '<strong>Success:</strong> Order(s) has been syncronized successfully.';
+$_['text_knawat_menu'] = 'Knawat Dropshipping';
