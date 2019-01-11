@@ -608,4 +608,13 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
         }
         return false;
     }
+    /*get attribute group id by name*/
+    public function getAttributeGroup($attribute_group_name){
+         $get_sql = "SELECT `attribute_group_id` FROM `" . DB_PREFIX . "attribute_group_description` WHERE  `name` = '" . $this->db->escape($attribute_group_name) . "'";
+        $result = $this->db->query( $get_sql );
+        if( isset( $result->num_rows ) && $result->num_rows > 0 && !empty( $result->rows ) ){
+            return $result->row['attribute_group_id'];
+        }
+        return false;
+    }
 }
