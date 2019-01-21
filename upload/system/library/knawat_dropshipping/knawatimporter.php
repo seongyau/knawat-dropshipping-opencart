@@ -438,7 +438,17 @@ class KnawatImporter{
                 foreach ($attributeNames as $key => $value) {
                     if(in_array($key, $languageCodes)){
                         $languageId = $languageIds[$key];
-                        $options = $attribute->options[0]->$key;
+                        if(isset($attribute->options[0]->$key)){
+                            $options = $attribute->options[0]->$key;
+                        }else{
+                            if(isset($attribute->options[0]->en)){
+                                $options = $attribute->options[0]->en;
+                            }else if (isset($attribute->options[0]->ar)) {
+                                $options = $attribute->options[0]->ar;
+                            }else if (isset($attribute->options[0]->tr)){
+                                $options = $attribute->options[0]->tr;
+                            }
+                        }
                         $attributeId = $this->model_extension_module_knawat_dropshipping->getAttributeData($value);
                         $productAttributes[$languageId] = array(
                             'text' => $options
