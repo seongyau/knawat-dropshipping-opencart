@@ -407,8 +407,8 @@ class KnawatImporter{
             $subArray = array();
             foreach ($product->attributes as $key => $attribute) {
                 $attributeNames =  (array)$attribute->name;
-                if($variationdata != $attributeNames){
                     foreach ($attributeNames as $key => $value) {
+                    if(!empty($variationdata[$key]) && !in_array($variationdata[$key], $attributeNames)){
                         if(in_array($key, $languageCodes)){
                             $attributeId = $this->model_extension_module_knawat_dropshipping->getAttributeData($value);
                             if(!$attributeId){
@@ -418,7 +418,9 @@ class KnawatImporter{
                                     'name'  => $value
                                 );
                             }               
-                        }                           
+                        } 
+                    }
+                                                  
                     }
                     if(!empty($newArray)){
                         $subArray['attribute_group_id'] = $attribute_group_id;
@@ -426,7 +428,6 @@ class KnawatImporter{
                         $subArray['attribute_description'] = $newArray; 
                         $this->model_catalog_attribute->addAttribute($subArray);         
                     }
-                }
             }
         }
         /*attribute code*/
