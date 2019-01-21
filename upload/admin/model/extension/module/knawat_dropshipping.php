@@ -404,6 +404,8 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
                     $option_id = $this->get_option_id_by_name( $key );
                     if( !$option_id ){
                         $option_id = $this->create_option( $attribute['name'] );
+                    }else{
+                        $this->update_option($option_id,$attribute['name']);
                     }
 
                     if( !$option_id ){
@@ -516,6 +518,23 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
     }
 
     /**
+    * update option
+    */
+    public function update_option($option_id,$attribute_names){
+        foreach ( $this->languages as $key => $lng ) {
+            // Check for name in current language.
+            $lng_code = explode( '-', $lng['code'] );
+            $lng_code = $lng_code[0];
+            $attr_name = array_key_exists( $lng_code, $attribute_names ) ? $attribute_names[$lng_code] : (isset($attribute_names['en']));
+            // if option name is blank then take a chance for TR.
+            if( empty( $attr_name ) ){
+                $attr_name = isset( $attribute_names['tr'] ) ? $attribute_names['tr'] : '';
+            }
+             $sql = "UPDATE " . DB_PREFIX . "option_description SET name = '".$attr_name."' WHERE option_id = ".(int)$option_id." AND language_id = " . (int)$lng['language_id'];
+             $this->db->query($sql);
+        }
+    }
+    /**
      * Get option value ID by Name
      */
     public function get_option_value_id_by_name( $option_value_name, $option_id ) {
@@ -543,7 +562,7 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
             $lng_code = $lng_code[0];
 
             $option_value_names = (array) $option_value_names;
-            $value_name = array_key_exists( $lng_code, $option_value_names ) ? $option_value_names[$lng_code] : $option_value_names['en'];
+            $value_name = array_key_exists( $lng_code, $option_value_names ) ? $option_value_names[$lng_code] : (isset($option_value_names['en']));
             // if option name is blank then take a chance for TR.
             if( empty( $value_name ) ){
                 $value_name = isset( $option_value_names['tr'] ) ? $option_value_names['tr'] : '';
