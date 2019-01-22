@@ -341,6 +341,20 @@ class KnawatImporter{
                 if( empty( $product_name )){
                   $product_name = isset( $name->en ) ? $name->en : '';
               }
+              /*set url*/
+             if(version_compare(VERSION, '3.0.0','<') ) {
+                if(isset($name->en)){
+                    $urlData = $name->en;
+                }elseif (isset($name->$lng_code)) {
+                    $urlData = $name->en;
+                }
+                if(!empty($urlData)){
+                    $url = strtolower($urlData);
+                    $urlKey = str_replace(' ', '-', $url); 
+                    $temp['keyword'] = $urlKey;
+                }
+              }
+              /*set url*/
               $product_desc = isset( $description->$lng_code ) ? $description->$lng_code : '';
               if( empty( $product_desc )){
                   $product_desc = isset( $description->en ) ? $description->en : '';
