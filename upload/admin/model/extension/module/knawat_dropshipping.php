@@ -502,7 +502,7 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
             // Check for name in current language.
             $lng_code = explode( '-', $lng['code'] );
             $lng_code = $lng_code[0];
-            $attr_name = array_key_exists( $lng_code, $attribute_names ) ? $attribute_names[$lng_code] : $attribute_names['en'];
+            $attr_name = array_key_exists( $lng_code, $attribute_names ) ? $attribute_names[$lng_code] : (isset($attribute_names['en']));
             // if option name is blank then take a chance for TR.
             if( empty( $attr_name ) ){
                 $attr_name = isset( $attribute_names['tr'] ) ? $attribute_names['tr'] : '';
