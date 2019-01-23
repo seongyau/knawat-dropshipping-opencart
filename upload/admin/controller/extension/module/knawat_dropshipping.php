@@ -9,58 +9,104 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 	}
 
 	public function install(){
-		$this->load->model('setting/event' );
-		$this->load->model( $this->route );
-		$this->model_extension_module_knawat_dropshipping->install();
+		if(version_compare(VERSION, '3.0.0','<') ) {
+			$this->load->model('extension/event' );
+			$this->load->model( $this->route );
+			$this->model_extension_module_knawat_dropshipping->install();
 
-		/**
-		 * Add Events
-		 */
-		$this->model_setting_event->addEvent(
-			'knawat_dropshipping_add_to_cart',
-			'catalog/controller/checkout/cart/add/before',
-			'extension/module/knawat_dropshipping/before_add_to_cart'
-		);
+			/**
+		 	* Add Events
+		 	*/
+			$this->model_extension_event->addEvent(
+				'knawat_dropshipping_add_to_cart',
+				'catalog/controller/checkout/cart/add/before',
+				'extension/module/knawat_dropshipping/before_add_to_cart'
+			);
 
-		$this->model_setting_event->addEvent(
-			'knawat_dropshipping_single_product',
-			'catalog/controller/product/product/after',
-			'extension/module/knawat_dropshipping/after_single_product'
-		);
+			$this->model_extension_event->addEvent(
+				'knawat_dropshipping_single_product',
+				'catalog/controller/product/product/after',
+				'extension/module/knawat_dropshipping/after_single_product'
+			);
 
-		$this->model_setting_event->addEvent(
-            'knawat_dropshipping_order_changed',
-            'catalog/model/checkout/order/addOrderHistory/after',
-            'extension/module/knawat_dropshipping/order_changed'
-        );
+			$this->model_extension_event->addEvent(
+            	'knawat_dropshipping_order_changed',
+            	'catalog/model/checkout/order/addOrderHistory/after',
+            	'extension/module/knawat_dropshipping/order_changed'
+        	);
+		}else{
+			$this->load->model('setting/event' );
+			$this->load->model( $this->route );
+			$this->model_extension_module_knawat_dropshipping->install();
+
+			/**
+		 	* Add Events
+		 	*/
+			$this->model_setting_event->addEvent(
+				'knawat_dropshipping_add_to_cart',
+				'catalog/controller/checkout/cart/add/before',
+				'extension/module/knawat_dropshipping/before_add_to_cart'
+			);
+
+			$this->model_setting_event->addEvent(
+				'knawat_dropshipping_single_product',
+				'catalog/controller/product/product/after',
+				'extension/module/knawat_dropshipping/after_single_product'
+			);
+
+			$this->model_setting_event->addEvent(
+            	'knawat_dropshipping_order_changed',
+            	'catalog/model/checkout/order/addOrderHistory/after',
+            	'extension/module/knawat_dropshipping/order_changed'
+        	);
+		}
 	}
 
 	public function uninstall(){
-		$this->load->model('setting/event' );
-		$this->load->model('setting/setting');
+		if(version_compare(VERSION, '3.0.0','<') ) {
+			$this->load->model('extension/event' );
+			$this->load->model('setting/setting');
+			$events = $this->model_extension_event->getEvents();
+			$data = array(
+				'knawat_dropshipping_add_to_cart',
+				'knawat_dropshipping_single_product',
+				'knawat_dropshipping_order_changed'
+			);
 
-		$events = $this->model_setting_event->getEvents();
-		$data = array(
-			'knawat_dropshipping_add_to_cart',
-			'knawat_dropshipping_single_product',
-			'knawat_dropshipping_order_changed'
-		);
-
-		// Delete events
-		foreach ($events as $event) {
-			if ( in_array($event['code'], $data ) ) {
-				$this->model_setting_event->deleteEvent( $event['event_id'] );
+			// Delete events
+			foreach ($events as $event) {
+				if ( in_array($event['code'], $data ) ) {
+					$this->model_extension_event->deleteEvent( $event['event_id'] );
+				}
 			}
-		}
+			// Delete settings
+			$this->model_setting_setting->deleteSetting('module_knawat_dropshipping');
+		}else{
+			$this->load->model('setting/event' );
+			$this->load->model('setting/setting');
+			$events = $this->model_setting_event->getEvents();
+			$data = array(
+				'knawat_dropshipping_add_to_cart',
+				'knawat_dropshipping_single_product',
+				'knawat_dropshipping_order_changed'
+			);
 
-		// Delete settings
-		$this->model_setting_setting->deleteSetting('module_knawat_dropshipping');
+			// Delete events
+			foreach ($events as $event) {
+				if ( in_array($event['code'], $data ) ) {
+					$this->model_setting_event->deleteEvent( $event['event_id'] );
+				}
+			}
+
+			// Delete settings
+			$this->model_setting_setting->deleteSetting('module_knawat_dropshipping');
+		}
 	}
 
 	// Enabled & Disable ingnore for now.
 	/* public function enabled() {
 		$this->load->model('setting/event');
-		$events = $this->model_setting_event->getEvents();
+		$events = $this->model_extension_event->getEvents();
 
 		$data = array(
 			'knawat_dropshipping_add_to_cart',
@@ -70,14 +116,14 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 
 		foreach ( $events as $event ) {
 			if ( in_array($event['code'], $data) ) {
-				$this->model_setting_event->enableEvent( $event['event_id'] );
+				$this->model_extension_event->enableEvent( $event['event_id'] );
 			}
 		}
 	}
 
 	public function disabled() {
 		$this->load->model('setting/event');
-		$events = $this->model_setting_event->getEvents();
+		$events = $this->model_extension_event->getEvents();
 
 		$data = array(
 			'knawat_dropshipping_add_to_cart',
@@ -87,12 +133,17 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 
 		foreach ( $events as $event ) {
 			if ( in_array($event['code'], $data) ) {
-				$this->model_setting_event->disableEvent( $event['event_id'] );
+				$this->model_extension_event->disableEvent( $event['event_id'] );
 			}
 		}
 	} */
 
 	public function index() {
+		if(version_compare(VERSION, '3.0.0','<') ) {
+			$tokenField = 'token';
+		}else{
+			$tokenField = 'user_token';
+		}
 		if( !session_id() ){
 			session_start();
 		}
@@ -111,8 +162,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 			$knawatapi = new KnawatMPAPI( $this->registry );
 
 			$this->session->data['success'] = $this->language->get('text_success');
-
-			$this->response->redirect($this->url->link( $this->route, 'user_token=' . $this->session->data['user_token'] . '&type=module', true));
+			$this->response->redirect($this->url->link( $this->route, $tokenField.'=' . $this->session->data[$tokenField] . '&type=module', true));
 		}
 
 		// Load Laguage strings
@@ -167,26 +217,27 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		}
 
 		// Setup Breadcrumbs Data.
+
 		$data['breadcrumbs'] = array();
 
 		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
+			'href' => $this->url->link('common/dashboard', $tokenField.'=' . $this->session->data[$tokenField], true)
 		);
 
 		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_extension'),
-			'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true)
+			'href' => $this->url->link('marketplace/extension', $tokenField.'=' . $this->session->data[$tokenField] . '&type=module', true)
 		);
 
 		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link( $this->route, 'user_token=' . $this->session->data['user_token'], true)
+			'href' => $this->url->link( $this->route, $tokenField.'=' . $this->session->data[$tokenField], true)
 		);
 
-		$data['action'] = $this->url->link( $this->route, 'user_token=' . $this->session->data['user_token'], true);
+		$data['action'] = $this->url->link( $this->route, $tokenField.'=' . $this->session->data[$tokenField], true);
 
-		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
+		$data['cancel'] = $this->url->link('marketplace/extension', $tokenField.'=' . $this->session->data[$tokenField] . '&type=module', true);
 
 		// Set module status
 		if (isset($this->request->post['module_knawat_dropshipping_status'])) {
@@ -237,7 +288,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 			}
 		}
 
-		$data['knawat_ajax_url'] = $this->url->link( $this->route .'/ajax_import', 'user_token=' . $this->session->data['user_token'], true);
+		$data['knawat_ajax_url'] = $this->url->link( $this->route .'/ajax_import', $tokenField.'=' . $this->session->data[$tokenField], true);
 
 		$_SESSION['csrf_token'] = base64_encode(openssl_random_pseudo_bytes(32));
 		$data['csrf_token'] = $_SESSION['csrf_token'];
@@ -248,7 +299,35 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		}else{
 			$data['knawat_ajax_loader']  = HTTP_SERVER .'view/image/knawat_ajax_loader.gif';
 		}
-
+		/*added for lower version*/
+		if(version_compare(VERSION, '3.0.0','<') ) {
+			$data['text_edit'] = $this->language->get('text_edit');
+			$data['text_enabled'] = $this->language->get('text_enabled');
+			$data['text_disabled'] = $this->language->get('text_disabled');
+			$data['entry_status'] = $this->language->get('entry_status');
+			$data['text_notconnected'] = $this->language->get('text_notconnected');
+			$data['text_notconnected_desc'] = $this->language->get('text_notconnected_desc');
+			$data['entry_connection'] = $this->language->get('entry_connection');
+			$data['entry_store'] = $this->language->get('entry_store');
+			$data['success_ajaximport'] = $this->language->get('success_ajaximport');
+			$data['text_import_stats'] = $this->language->get('text_import_stats');
+			$data['text_imported'] = $this->language->get('text_imported');
+			$data['text_products'] = $this->language->get('text_products');
+			$data['text_updated'] = $this->language->get('text_updated');
+			$data['text_failed'] = $this->language->get('text_failed');
+			$data['text_syncing'] = $this->language->get('text_syncing');
+			$data['warning_ajaximport'] = $this->language->get('warning_ajaximport');
+			$data['success_ordersync'] = $this->language->get('success_ordersync');
+			$data['error_wrong'] = $this->language->get('error_wrong');
+			$data['error_ajaximport'] = $this->language->get('error_ajaximport');
+			$data['text_connected'] = $this->language->get('text_connected');
+			$data['text_connected_desc'] = $this->language->get('text_connected_desc');
+			$data['text_run_import'] = $this->language->get('text_run_import');
+			$data['text_import_products'] = $this->language->get('text_import_products');
+			$data['heading_title'] = $this->language->get('heading_title');
+			$data['text_import_inprogress'] = $this->language->get('text_import_inprogress');
+		}
+		/*added for language*/
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
