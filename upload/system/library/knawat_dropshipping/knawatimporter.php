@@ -432,6 +432,7 @@ class KnawatImporter{
         }
         /*attribute code*/
         /*product code*/
+       if(!empty($product->attributes)){
         foreach ($product->attributes as $key => $attribute) {
             $attributeNames =  (array)$attribute->name;
             if($variationdata != $attributeNames){
@@ -463,6 +464,7 @@ class KnawatImporter{
                 }
             }
         }
+    }
         /*product code end*/
 
             /**

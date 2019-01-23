@@ -10,6 +10,7 @@ class ControllerExtensionModuleKnawatCron extends Controller {
 	}
 
 	public function ajax_import($data){
+		set_time_limit(0);
 		if( $this->is_admin ){
 			$this->load->model( $this->route );
 		}else{

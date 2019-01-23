@@ -271,7 +271,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 
 	public function ajax_import(){
 		require_once( DIR_SYSTEM . 'library/knawat_dropshipping/knawatimporter.php');
-
+		set_time_limit(0);
 		$item = array();
 		if( isset( $this->request->post['process_data'] ) && !empty( $this->request->post['process_data'] ) ){
 			$process_data = $this->request->post['process_data'];
