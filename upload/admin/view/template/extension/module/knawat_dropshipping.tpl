@@ -33,7 +33,7 @@
             <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
        <?php } ?>
-       <?php if ($token_error) { ?>
+       <?php if (!empty($cronsync_warning)) { ?>
         <div class="alert alert-danger alert-dismissible">
             <i class="fa fa-exclamation-circle"></i> <?php echo $text_cron_sync_error; ?> <a href="https://github.com/Knawat/knawat-dropshipping-opencart/wiki/1.-Installation-Guide" id="install_guide" target="_blank"> <?php echo $cronjob; ?> </a> <?php echo $trigger; ?>
             <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -148,7 +148,7 @@
                         <label class="col-sm-2 control-label"><?php echo $text_import_note; ?></label>
                         <div class="col-sm-10">
                             <h4><small><?php echo $cron_url_info; ?></small></h4>
-                            <b><?php  $cron_url; ?></b>
+                            <b><?php echo $cron_url; ?></b>
                         </div>
                     </div>
                 </form>

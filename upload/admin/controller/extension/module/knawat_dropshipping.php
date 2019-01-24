@@ -336,6 +336,11 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 			$data['text_import_products'] = $this->language->get('text_import_products');
 			$data['heading_title'] = $this->language->get('heading_title');
 			$data['text_import_inprogress'] = $this->language->get('text_import_inprogress');
+			$data['cron_url_info'] = $this->language->get('cron_url_info');
+			$data['text_import_note'] = $this->language->get('text_import_note');
+			$data['text_cron_sync_error'] = $this->language->get('text_cron_sync_error');
+			$data['trigger'] = $this->language->get('trigger');
+			$data['cronjob'] = $this->language->get('cronjob');
 		}
 		/*added for language*/
 		$data['header'] = $this->load->controller('common/header');
