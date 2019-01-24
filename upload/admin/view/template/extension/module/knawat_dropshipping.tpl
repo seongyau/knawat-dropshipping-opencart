@@ -28,14 +28,17 @@
         </div>
         <?php } ?>
          <?php if ($token_error) { ?>
-        <!-- {% if token_error %} -->
         <div class="alert alert-danger alert-dismissible">
             <i class="fa fa-exclamation-circle"></i> <?php echo $token_error; ?>
             <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
        <?php } ?>
-        <!-- {% if ordersync_warning %} -->
-
+       <?php if ($token_error) { ?>
+        <div class="alert alert-danger alert-dismissible">
+            <i class="fa fa-exclamation-circle"></i> <?php echo $text_cron_sync_error; ?> <a href="https://github.com/Knawat/knawat-dropshipping-opencart/wiki/1.-Installation-Guide" id="install_guide" target="_blank"> <?php echo $cronjob; ?> </a> <?php echo $trigger; ?>
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        <?php } ?>
         <?php if (!empty($ordersync_warning)) { ?>
         <div class="alert alert-warning alert-dismissible knawat_message">
             <i class="fa fa-exclamation-circle"></i>
@@ -43,7 +46,6 @@
             <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
         <?php } ?>
-        <!-- {% if success %} -->
         <?php if ($success) { ?>
         <div class="alert alert-success alert-dismissible">
             <i class="fa fa-check-circle"></i> <?php echo  $success; ?>
@@ -63,21 +65,16 @@
                         <label class="col-sm-2 control-label" for="input-status"><?php echo $entry_status; ?></label>
                         <div class="col-sm-10">
                             <select name="module_knawat_dropshipping_status" id="input-status" class="form-control">
-                                <!-- {% if module_knawat_dropshipping_status %} -->
                                 <?php if ($module_knawat_dropshipping_status) { ?>
                                 <option value="1" selected="selected"><?php echo $text_enabled; ?></option>
                                 <option value="0"><?php echo  $text_disabled; ?></option>
-                                <!-- {% else %} -->
                                 <?php } else{ ?>
                                 <option value="1"><?php echo $text_enabled; ?></option>
                                 <option value="0" selected="selected"><?php echo  $text_disabled; ?></option>
-                                <!-- {% endif %} -->
                                 <?php } ?>
                             </select>
-                            <!-- {% if error_status %} -->
                             <?php if($error_status){ ?>
                             <div class="text-danger"><?php echo $error_status; ?></div>
-                            <!-- {% endif %} -->
                             <?php } ?>
                         </div>
                     </div>
@@ -102,15 +99,12 @@
                     <div class="form-group">
                         <label class="col-sm-2 control-label"><?php echo $entry_connection; ?></label>
                         <div class="col-sm-10">
-                            <!-- {% if token_valid %} -->
                             <?php if($token_valid) { ?>
                             <h4><span class="label label-success"><?php echo $text_connected; ?></span></h4>
                             <small><?php echo $text_connected_desc; ?></small>
-                            <!-- {% else %} -->
                             <?php } else { ?>
                             <h4><span class="label label-danger"><?php echo $text_notconnected; ?></span></h4>
                             <small><?php echo $text_notconnected_desc; ?></small>
-                            <!-- {% endif %} -->
                             <?php } ?>
                         </div>
                     </div>
@@ -119,22 +113,17 @@
                         <label class="col-sm-2 control-label"><?php echo $entry_store; ?></label>
                         <div class="col-sm-10">
                             <div class="well well-sm" style="height: 150px; overflow: auto;">
-                                <!-- {% for store in stores %} -->
-                               
                                 <?php foreach ($stores as $store) { ?>
                                 <div class="checkbox">
-                                    <label> <!-- {% if store.store_id in module_knawat_dropshipping_store %} -->
-                                            <?php if(in_array($store['store_id'], $module_knawat_dropshipping_store)) { ?>
+                                    <label>
+                                    <?php if(in_array($store['store_id'], $module_knawat_dropshipping_store)) { ?>
                                         <input type="checkbox" name="module_knawat_dropshipping_store[]" value="<?php echo $store['store_id']; ?>" checked="checked" /> <?php echo  $store['name']; ?> <?php } else { ?>
                                         <input type="checkbox" name="module_knawat_dropshipping_store[]" value="<?php echo $store['store_id']; ?>" /> <?php echo  $store['name']; ?> <?php } ?> </label>
                                 </div>
-                                <!-- {% endfor %} -->
                                 <?php } ?>
                                 </div>
                         </div>
                     </div>
-
-                    <!-- {% if token_valid %} -->
                     <?php if($token_valid){ ?>
                     <div class="form-group">
                         <label class="col-sm-2 control-label" for="input-knawat-consumer-secret"><?php echo $text_import_products; ?></label>
@@ -154,8 +143,14 @@
                             </div>
                         </div>
                     </div>
-                    <!-- {% endif %} -->
                     <?php } ?>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label"><?php echo $text_import_note; ?></label>
+                        <div class="col-sm-10">
+                            <h4><small><?php echo $cron_url_info; ?></small></h4>
+                            <b><?php  $cron_url; ?></b>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>

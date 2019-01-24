@@ -185,7 +185,13 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		if( !empty( $sync_failed_orders ) ){
 			$data['ordersync_warning'] = 1;
 		}
-
+		//check for product cron time 
+		$oldTime = $this->model_extension_module_knawat_dropshipping->get_knawat_meta('8162', 'time', 'cron_time' );
+		$test = time();
+		$difference = $test - (int)$oldTime;
+		if($difference > 10800){
+			$data['cronsync_warning'] = 1;	
+		}
 		// Status Error
 		if (isset($this->error['error_status'])) {
             $data['error_status'] = $this->error['error_status'];
@@ -299,6 +305,10 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		}else{
 			$data['knawat_ajax_loader']  = HTTP_SERVER .'view/image/knawat_ajax_loader.gif';
 		}
+		/*cron url*/
+		$randomNumber = $this->generateRandomString();
+		$data['cron_url'] = dirname(HTTP_SERVER)."?route=extension/module/knawat_cron/importProducts&access_token=$randomNumber";
+		/*cron url*/
 		/*added for lower version*/
 		if(version_compare(VERSION, '3.0.0','<') ) {
 			$data['text_edit'] = $this->language->get('text_edit');
@@ -423,5 +433,21 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		}
 		return false;
 	}
+
+	public function generateRandomString($length = 10)
+       {
+       		$accessToken = $this->model_extension_module_knawat_dropshipping->get_knawat_meta('8161', 'token','access_token');
+       		if(empty($accessToken)){
+            $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            $charactersLength = strlen($characters);
+           	$randomString = '';
+            for ($i = 0; $i < $length; $i++) {
+               $randomString .= $characters[rand(0, $charactersLength - 1)];
+            }
+          $this->model_extension_module_knawat_dropshipping->update_knawat_meta('8161', 'token',$randomString, 'access_token' );
+          return $randomString;
+     	 }
+      	return $accessToken;
+     }
 }
 ?>

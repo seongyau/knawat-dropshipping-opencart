@@ -11,14 +11,8 @@ class ControllerExtensionModuleKnawatCron extends Controller {
 
 	public function ajax_import($data){
 		set_time_limit(0);
-		if( $this->is_admin ){
-			$this->load->model( $this->route );
-		}else{
-			$admin_dir = str_replace( 'system/', 'admin/', DIR_SYSTEM );
-			require_once $admin_dir . "model/extension/module/knawat_dropshipping.php";
-			$this->model_extension_module_knawat_dropshipping = new ModelExtensionModuleKnawatDropshipping( $this->registry );
-		}
-
+		
+		$this->loadAdminModel();
 		require_once( DIR_SYSTEM . 'library/knawat_dropshipping/knawatimporter.php');
 
 		$item = array();
@@ -82,9 +76,29 @@ class ControllerExtensionModuleKnawatCron extends Controller {
 	}
 	
 	public function importProducts($data = array()){
-		$data = (array)json_decode($this->ajax_import($data));
-		if(!$data['is_complete']){
-			$this->importProducts($data);
+		$this->loadAdminModel();
+		if(empty($data)){
+			 $cronTime = time();
+			 $this->model_extension_module_knawat_dropshipping->update_knawat_meta('8162', 'time',$cronTime, 'cron_time' );
+		}
+		$access_token = $this->model_extension_module_knawat_dropshipping->get_knawat_meta('8161', 'token','access_token');
+		$token = $this->request->get['access_token'];
+		if($access_token == $token){
+			$data = (array)json_decode($this->ajax_import($data));
+			if(!$data['is_complete']){
+				$this->importProducts($data);
+			}
+		}
+		
+	}
+
+	public function loadAdminModel(){
+		if( $this->is_admin ){
+			$this->load->model( $this->route );
+		}else{
+			$admin_dir = str_replace( 'system/', 'admin/', DIR_SYSTEM );
+			require_once $admin_dir . "model/extension/module/knawat_dropshipping.php";
+			$this->model_extension_module_knawat_dropshipping = new ModelExtensionModuleKnawatDropshipping( $this->registry );
 		}
 	}
 
