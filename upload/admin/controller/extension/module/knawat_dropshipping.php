@@ -2,6 +2,7 @@
 class ControllerExtensionModuleKnawatDropshipping extends Controller { 
 	
 	private $error = array();
+	public $params = array();
 	private $route = 'extension/module/knawat_dropshipping';
 
 	public function __construct($registry) {
@@ -454,5 +455,79 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
      	 }
       	return $accessToken;
      }
+
+   	public function pullOrder(){
+		$pull_results = $this->knawatPullOrders();
+		if (!empty($pull_results)) {
+			while (isset($pull_results['is_complete']) && $pull_results['is_complete'] != true) {
+				$pull_results = $this->knawatPullOrders($pull_results);
+			}
+		}
+	}
+
+	public function knawatPullOrders($item = [])
+	{
+		$this->loadAdminModel();
+		$default_args = [
+            'limit'             => 2, // Limit for Fetch Orders
+            'page'              => 1,  // Page Number
+        ];
+        $this->params = $default_args;
+        if (empty($item)) {
+        	$item = $this->params;
+        }
+        require_once( DIR_SYSTEM . 'library/knawat_dropshipping/knawatmpapi.php' );
+        $knawatapi = new KnawatMPAPI( $this->registry );
+        $knawat_orders =  $knawatapi->get('orders/?page='.$item['page'].'&limit='.$item['limit']);
+
+        if (empty($knawat_orders)) {
+        	return false;
+        }
+        foreach ($knawat_orders as $knawat_order) {
+        	if ($knawat_order->id) {
+        		$knawatId = $knawat_order->id;
+        		$this->log->write("order index event called");
+        		$order_id = $this->model_extension_module_knawat_dropshipping->get_knawat_meta_from_value('order', $knawatId);
+        		if(!empty($order_id)){
+        			$knawat_status = isset($knawat_order->knawat_order_status) ? $knawat_order->knawat_order_status : '';
+        			$shipment_provider_name = isset($knawat_order->shipment_provider_name) ? $knawat_order->shipment_provider_name : '';
+        			$shipment_tracking_number = isset($knawat_order->shipment_tracking_number) ? $knawat_order->shipment_tracking_number : '';
+        			if(!empty($knawat_status)){
+        				$this->model_extension_module_knawat_dropshipping->update_knawat_meta( $order_id, 'knawat_order_status', $knawat_status, 'order' );
+        			}
+        			if(!empty($shipment_provider_name)){
+        				$this->model_extension_module_knawat_dropshipping->update_knawat_meta( $order_id, 'shipment_provider_name', $shipment_provider_name, 'order' );
+        			}
+        			if(!empty($shipment_tracking_number)){
+        				$this->model_extension_module_knawat_dropshipping->update_knawat_meta( $order_id, 'shipment_tracking_number', $shipment_tracking_number, 'order' );
+        			}
+        		}
+        		$this->log->write("page");
+        		$this->log->write($item['page']);
+        	}
+        }
+
+        $item['orders_total'] = count($knawat_orders);
+        if ($item['orders_total'] < $item['limit']) {
+        	$item['is_complete'] = true;
+        	return $item;
+        } else {
+        	$item['page'] = $item['page'] + 1;
+        	$this->params['page'] = $item['page'];
+        	$item['is_complete'] = false;
+        	return $item;
+        }
+        return false;
+    }
+
+    public function loadAdminModel(){
+    	if( $this->is_admin ){
+    		$this->load->model( $this->route );
+    	}else{
+    		$admin_dir = str_replace( 'system/', 'admin/', DIR_SYSTEM );
+    		require_once $admin_dir . "model/extension/module/knawat_dropshipping.php";
+    		$this->model_extension_module_knawat_dropshipping = new ModelExtensionModuleKnawatDropshipping( $this->registry );
+    	}
+    }
 }
 ?>

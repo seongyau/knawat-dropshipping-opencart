@@ -60,6 +60,21 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
     }
 
     /**
+     * Get Custom data by id and resource.
+     */
+    public function get_knawat_meta_from_value( $resource_type = 'order',$meta_value , $single = true ) {
+        $get_sql = "SELECT * FROM `" . DB_PREFIX . "knawat_metadata` WHERE `meta_value` = '".$this->db->escape($meta_value)."' AND `resource_type` = '".$this->db->escape($resource_type)."' LIMIT 1";
+        $result = $this->db->query( $get_sql );
+        if( isset( $result->num_rows ) && $result->num_rows > 0 && !empty( $result->rows ) ){
+            if( $single ){
+                return $result->rows[0]['resource_id'];
+            }else{
+                return $result->rows[0];
+            }
+        }
+        return false;
+    }
+    /**
      * Add Custom data by id and resource.
      */
     public function add_knawat_meta( $resource_id, $meta_key, $meta_value = '', $resource_type = 'product' ) {
