@@ -45,19 +45,19 @@
             <search><![CDATA[ {{ footer }}  ]]></search>
             <add position="before"><![CDATA[
                  <script type="text/javascript">
-         $( document ).ready(function(){
-            setTimeout(function() {
-                var url = "index.php?route=extension/module/knawat_dropshipping/pullOrder&user_token={{ user_token }}";
-                jQuery.ajax({
-                    url: url,
-                    type: "GET",
-                    cache: false,
-                    success: function(response){
+                 $( document ).ready(function(){
+                setTimeout(function() {
+                    var url = "index.php?route=extension/module/knawat_dropshipping/pullOrder&user_token={{ user_token }}";
+                    jQuery.ajax({
+                        url: url,
+                        type: "GET",
+                        cache: false,
+                        success: function(response){
                     },
                 });
             }, 18000);
         });
-</script> 
+        </script> 
             ]]></add>
         </operation>
     </file>
@@ -66,9 +66,9 @@
             <search><![CDATA[ echo $footer;  ]]></search>
             <add position="before"><![CDATA[
                  <script type="text/javascript">
-         $( document ).ready(function(){
-              setTimeout(function() {
-                var url = "index.php?route=extension/module/knawat_dropshipping/pullOrder&token=<?php echo $token; ?>";
+                $( document ).ready(function(){
+                setTimeout(function() {
+                    var url = "index.php?route=extension/module/knawat_dropshipping/pullOrder&token=<?php echo $token; ?>";
                 jQuery.ajax({
                     url: url,
                     type: "GET",
@@ -79,6 +79,131 @@
             }, 18000);
         });
 </script>      
+            ]]></add>
+        </operation>
+    </file>
+    <file path="admin/controller/sale/order.php">
+        <operation>
+            <search><![CDATA[ $this->response->setOutput($this->load->view('sale/order_info', $data));  ]]></search>
+            <add position="before"><![CDATA[
+                 if( $this->is_admin ){
+            $this->load->model('extension/module/knawat_dropshipping');
+            }else{
+            $admin_dir = str_replace( 'system/', 'admin/', DIR_SYSTEM );
+            require_once $admin_dir . "model/extension/module/knawat_dropshipping.php";
+            $this->model_extension_module_knawat_dropshipping = new ModelExtensionModuleKnawatDropshipping( $this->registry );
+            }
+            $knawat_order_status = $this->model_extension_module_knawat_dropshipping->get_knawat_meta($order_id, 'knawat_order_status','order');
+            if(!empty($knawat_order_status)){
+                $this->load->language('extension/module/knawat_dropshipping');
+                $data['display_knawat'] = 1;
+                $data['knawat_order_label'] = $this->language->get('knawat_order_label');   
+                $data['knawat_order_status_label'] = $this->language->get('knawat_order_status_label');
+                $data['knawat_order_status_value'] = $knawat_order_status;
+                $knawat_shipment_provider = $this->model_extension_module_knawat_dropshipping->get_knawat_meta($order_id, 'shipment_provider_name','order');
+                if(!empty($knawat_shipment_provider)){
+                    $data['knawat_order_shipment_label'] = $this->language->get('knawat_order_shipment_label');
+                    $data['knawat_shipment_provider'] = $knawat_shipment_provider;
+                }
+                $knawat_tracking_number = $this->model_extension_module_knawat_dropshipping->get_knawat_meta($order_id, 'shipment_tracking_number','order');
+                if(!empty($knawat_tracking_number)){
+                    $data['knawat_order_tracking_label'] = $this->language->get('knawat_order_tracking_label');
+                    $data['knawat_tracking_number'] = $knawat_tracking_number;
+                }
+                if (!empty($knawat_shipment_provider) && !empty($knawat_tracking_number)) {
+                     $trackingLink = '';
+                     $providersLink = [
+                    'dhl' => 'http://www.dhl.com/content/g0/en/express/tracking.shtml?brand=DHL&AWB={TRACKINGNUMBER}',
+                    'aramex' => 'https://www.aramex.com/track/results?ShipmentNumber={TRACKINGNUMBER}',
+                    ];
+                    $providerName = trim(strtolower($knawat_shipment_provider));
+                    if ((!empty($providerName)) && array_key_exists($providerName, $providersLink)) {
+                        $trackingLink = str_replace('{TRACKINGNUMBER}', $knawat_tracking_number, $providersLink[$providerName]);
+                    } else {
+                        $trackingLink = 'https://track24.net/?code='.$knawat_tracking_number;
+                    }
+                    $data['knawat_tracking_link_label'] = $this->language->get('knawat_tracking_link_label');
+                    $data['track_link'] = $trackingLink;
+                }
+            }   
+            ]]></add>
+        </operation>
+    </file>
+     <file path="admin/view/template/sale/order_info.twig">
+        <operation>
+            <search><![CDATA[   <div class="panel-body">  ]]></search>
+            <add position="before"><![CDATA[
+            {% if display_knawat %}
+            <div class="panel-body">
+            <table class="table table-bordered">
+          <thead>
+            <tr>
+              <td style="width: 100%;" class="text-left">{{ knawat_order_label }}</td>
+            </tr>
+          </thead>
+          <tbody>
+            {% if knawat_order_status_value %}
+            <tr>
+              <td class="text-left">{{ knawat_order_status_label }} {{ knawat_order_status_value }}</td>
+            </tr>
+            {% endif %}  
+            {% if knawat_shipment_provider %}
+            <tr>
+              <td class="text-left">{{ knawat_order_shipment_label }} {{ knawat_shipment_provider }}</td>
+            </tr>
+            {% endif %}
+            <tr>
+            {% if knawat_tracking_number %}
+            <td class="text-left">{{ knawat_order_tracking_label }} {{ knawat_tracking_number }}
+              {% if track_link %}
+              <a href="{{ track_link }}">{{ knawat_tracking_link_label }}</a>
+              {% endif %}  
+            </td>
+            {% endif %}
+            </tr>
+          </tbody>
+        </table>
+        </div>
+        {% endif %}  
+            ]]></add>
+        </operation>
+    </file>
+    <file path="admin/view/template/sale/order_info.tpl">
+        <operation>
+            <search><![CDATA[   <div class="panel-body">  ]]></search>
+            <add position="before"><![CDATA[
+                <?php if($display_knawat){ ?>
+                    <div class="panel-body">
+                      <table class="table table-bordered">
+                        <thead>
+                          <tr>
+                            <td style="width: 100%;" class="text-left"><?php echo $knawat_order_label; ?></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                      <?php if($knawat_order_status_value){ ?>
+                      <tr>
+                        <td class="text-left"><?php echo $knawat_order_status_label." ".$knawat_order_status_value ?></td>
+                    </tr>
+                    <?php } ?> 
+                    <?php if($knawat_shipment_provider){ ?>
+                    <tr>
+                        <td class="text-left"><?php echo $knawat_order_shipment_label." ".$knawat_shipment_provider; ?></td>
+                    </tr>
+                    <?php } ?>
+                    <tr>
+                        <?php if($knawat_tracking_number){ ?>
+                        <td class="text-left"><?php echo $knawat_order_tracking_label." ".$knawat_tracking_number; ?>
+                          <?php if($track_link){ ?>
+                          <a href="<?php echo $track_link; ?>"><?php echo $knawat_tracking_link_label; ?></a>
+                          <?php } ?>
+                      </td>
+                      <?php } ?>
+                  </tr>
+                </tbody>
+            </table>
+        </div>
+      <?php } ?>
             ]]></add>
         </operation>
     </file>
