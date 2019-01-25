@@ -63,12 +63,12 @@
     </file>
     <file path="admin/view/template/sale/order_list.tpl">
         <operation>
-            <search><![CDATA[ {{ footer }}  ]]></search>
+            <search><![CDATA[ echo $footer;  ]]></search>
             <add position="before"><![CDATA[
                  <script type="text/javascript">
          $( document ).ready(function(){
               setTimeout(function() {
-                var url = "index.php?route=extension/module/knawat_dropshipping/pullOrder&user_token={{ user_token }}";
+                var url = "index.php?route=extension/module/knawat_dropshipping/pullOrder&token=<?php echo $token; ?>";
                 jQuery.ajax({
                     url: url,
                     type: "GET",
