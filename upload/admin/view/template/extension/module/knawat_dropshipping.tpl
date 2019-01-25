@@ -34,7 +34,7 @@
         </div>
        <?php } ?>
        <?php if (!empty($cronsync_warning)) { ?>
-        <div class="alert alert-danger alert-dismissible">
+        <div class="alert alert-warning alert-dismissible">
             <i class="fa fa-exclamation-circle"></i> <?php echo $text_cron_sync_error; ?> <a href="https://github.com/Knawat/knawat-dropshipping-opencart/wiki/1.-Installation-Guide" id="install_guide" target="_blank"> <?php echo $cronjob; ?> </a> <?php echo $trigger; ?>
             <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
@@ -266,4 +266,9 @@
 
             });
         });
+    </script>
+    <script type="text/javascript">
+        window.onbeforeunload = function(){
+            return false;
+        };
     </script>
