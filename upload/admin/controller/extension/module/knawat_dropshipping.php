@@ -440,8 +440,10 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		return false;
 	}
 
-	public function generateRandomString($length = 10)
-       {
+	/**
+	 * Generate random string for token
+	 */
+	public function generateRandomString($length = 10){
        		$accessToken = $this->model_extension_module_knawat_dropshipping->get_knawat_meta('8161', 'token','access_token');
        		if(empty($accessToken)){
             $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -456,6 +458,9 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
       	return $accessToken;
      }
 
+   	/**
+	 * Pull orders from Knawat
+	 */
    	public function pullOrder(){
 		$pull_results = $this->knawatPullOrders();
 		if (!empty($pull_results)) {
@@ -519,6 +524,9 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
         return false;
     }
 
+    /**
+	 * Load knawat dropshipping model
+	 */
     public function loadAdminModel(){
     	if( $this->is_admin ){
     		$this->load->model( $this->route );

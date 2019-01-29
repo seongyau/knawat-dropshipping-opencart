@@ -3,24 +3,34 @@
 $_['heading_title']    	        = 'Knawat Dropshipping';
 
 // Text
-$_['text_extension']   	        = 'Extensions';
-$_['text_success']     	        = 'Success: Knawat Dropshipping Settings has been updated!';
-$_['text_edit']        	        = 'Knawat Dropshipping Settings';
-$_['text_knawat_menu']	        = 'Knawat Dropshipping';
-$_['text_import_inprogress']	= 'Import is In-Progress';
-$_['text_import_stats']	        = 'Import Stats';
-$_['text_products']	            = 'Products';
-$_['text_imported']	            = 'Imported';
-$_['text_updated']	            = 'Updated';
-$_['text_failed']	            = 'Failed';
-$_['text_import_products']	    = 'Import Products from Knawat.com';
-$_['text_run_import']		    = 'Run Import';
-$_['text_ordersync_botton']		= 'Sync Them Now';
-$_['text_syncing']		        = 'Synchronizing...';
-$_['text_connected']		    = 'Connected';
-$_['text_connected_desc']		= 'Your store is connected with knawat.com';
-$_['text_notconnected']		    = 'Not connected';
-$_['text_notconnected_desc']	= 'Your store is not connected with knawat.com. Please enter valid API keys and press save button to refresh connection';
+$_['text_extension']   	          = 'Extensions';
+$_['text_success']     	          = 'Success: Knawat Dropshipping Settings has been updated!';
+$_['text_edit']        	          = 'Knawat Dropshipping Settings';
+$_['text_knawat_menu']	          = 'Knawat Dropshipping';
+$_['text_import_inprogress']	  = 'Import is In-Progress';
+$_['text_import_stats']	          = 'Import Stats';
+$_['text_products']	              = 'Products';
+$_['text_imported']	              = 'Imported';
+$_['text_updated']	              = 'Updated';
+$_['text_failed']	              = 'Failed';
+$_['text_import_products']	      = 'Import Products from Knawat.com';
+$_['text_run_import']		      = 'Run Import';
+$_['text_ordersync_botton']		  = 'Sync Them Now';
+$_['text_syncing']		          = 'Synchronizing...';
+$_['text_connected']		      = 'Connected';
+$_['text_connected_desc']		  = 'Your store is connected with knawat.com';
+$_['text_notconnected']		      = 'Not connected';
+$_['text_notconnected_desc']	  = 'Your store is not connected with knawat.com. Please enter valid API keys and press save button to refresh connection';
+$_['text_knawat_menu']            = 'Knawat Dropshipping';
+$_['text_import_note']            = 'Note';
+$_['cronjob']                     = 'Cron Job Integration';
+$_['trigger'] 				      = "or trigger it manually from here using 'Run Import'.";
+$_['cron_url_info'] 			  = "Please use below endpoint url to setup your cronjob for automatic product import.";
+$_['knawat_order_label'] 		  = "Knawat Order Information";
+$_['knawat_order_status_label']   = "Knawat Order Status :";
+$_['knawat_order_shipment_label'] = "Shipment Provider Name :";
+$_['knawat_order_tracking_label'] = "Shipment Tracking Number :";
+$_['knawat_tracking_link_label']  = "Track";
 
 // Entry
 $_['entry_status']     				= 'Status';
@@ -35,6 +45,7 @@ $_['entry_connection']              = 'Connection Status';
 $_['warning_ajaximport']            = '<strong>Warning:</strong> Please do not close browser window until product import finish!';
 $_['warning_ordersync']             = '<strong>Warning:</strong> Some of your orders has been not synced with knawat.com.';
 $_['warning_apikey_needed']         = 'Consumer Key and Consumer Secret needed for get knawat access token.';
+$_['text_cron_sync_error']          = '<strong>Warning:</strong> Knawat products not syncing automatically, you need to setup your';
 
 // Error
 $_['error_permission'] 		= 'Warning: You do not have permission to modify knawat dropshipping module!';
@@ -45,14 +56,3 @@ $_['error_wrong'] 	        = '<strong>Error:</strong> Something went wrong. Plea
 // Success
 $_['success_ajaximport'] 	= '<strong>Success:</strong> Products are imported successfully.';
 $_['success_ordersync'] 	= '<strong>Success:</strong> Order(s) has been syncronized successfully.';
-$_['text_knawat_menu'] = 'Knawat Dropshipping';
-$_['text_import_note'] = 'Note';
-$_['text_cron_sync_error'] = '<strong>Warning:</strong> Knawat products not syncing automatically, you need to setup your';
-$_['cronjob'] = 'Cron Job Integration';
-$_['trigger'] = "or trigger it manually from here using 'Run Import'.";
-$_['cron_url_info'] = "Please use below endpoint url to setup your cronjob for automatic product import.";
-$_['knawat_order_label'] = "Knawat Order Information";
-$_['knawat_order_status_label'] = "Knawat Order Status :";
-$_['knawat_order_shipment_label'] = "Shipment Provider Name :";
-$_['knawat_order_tracking_label'] = "Shipment Tracking Number :";
-$_['knawat_tracking_link_label'] = "Track";

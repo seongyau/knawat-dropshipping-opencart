@@ -9,6 +9,9 @@ class ControllerExtensionModuleKnawatCron extends Controller {
 		//do nothing
 	}
 
+	/**
+    * Import parameters update
+    */
 	public function ajax_import($data){
 		set_time_limit(0);
 		
@@ -75,6 +78,9 @@ class ControllerExtensionModuleKnawatCron extends Controller {
 		return  $import_data = json_encode( $item );
 	}
 	
+	/**
+    * Import Products using Cron
+    */
 	public function importProducts($data = array()){
 		$this->loadAdminModel();
 		if(empty($data)){
@@ -92,6 +98,9 @@ class ControllerExtensionModuleKnawatCron extends Controller {
 		
 	}
 
+	/**
+    * Load Knawat Dropshipping Model
+    */
 	public function loadAdminModel(){
 		if( $this->is_admin ){
 			$this->load->model( $this->route );
