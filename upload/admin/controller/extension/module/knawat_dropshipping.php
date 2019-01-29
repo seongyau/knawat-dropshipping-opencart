@@ -486,7 +486,6 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
         foreach ($knawat_orders as $knawat_order) {
         	if ($knawat_order->id) {
         		$knawatId = $knawat_order->id;
-        		$this->log->write("order index event called");
         		$order_id = $this->model_extension_module_knawat_dropshipping->get_knawat_meta_from_value('order', $knawatId);
         		if(!empty($order_id)){
         			$knawat_status = isset($knawat_order->knawat_order_status) ? $knawat_order->knawat_order_status : '';
