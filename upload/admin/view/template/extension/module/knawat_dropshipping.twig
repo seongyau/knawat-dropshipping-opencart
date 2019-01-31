@@ -215,6 +215,9 @@
             );
             jQuery('#run_import').hide();
             jQuery('.ajax_import .import_inprocess').show();
+            window.onbeforeunload = function(){
+                    return false;
+            };
         }
 
         function knawat_ajax_import_stop() {
@@ -266,9 +269,4 @@
 
             });
         });
-    </script>
-    <script type="text/javascript">
-        window.onbeforeunload = function(){
-            return false;
-        };
     </script>
