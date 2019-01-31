@@ -6,7 +6,6 @@ $_['heading_title']    	        = 'Knawat Dropshipping';
 $_['text_extension']   	          = 'Extensions';
 $_['text_success']     	          = 'Success: Knawat Dropshipping Settings has been updated!';
 $_['text_edit']        	          = 'Knawat Dropshipping Settings';
-$_['text_knawat_menu']	          = 'Knawat Dropshipping';
 $_['text_import_inprogress']	  = 'Import is In-Progress';
 $_['text_import_stats']	          = 'Import Stats';
 $_['text_products']	              = 'Products';
@@ -31,6 +30,8 @@ $_['knawat_order_status_label']   = "Knawat Order Status :";
 $_['knawat_order_shipment_label'] = "Shipment Provider Name :";
 $_['knawat_order_tracking_label'] = "Shipment Tracking Number :";
 $_['knawat_tracking_link_label']  = "Track";
+$_['text_enabled'] 				  = 'Enabled';
+$_['text_disabled'] 			  = 'Disabled';
 
 // Entry
 $_['entry_status']     				= 'Status';
