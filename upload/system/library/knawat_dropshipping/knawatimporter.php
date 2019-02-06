@@ -528,13 +528,15 @@ class KnawatImporter{
             if( empty( $market_price ) ){
                 $market_price = $price;
             }
-            $weight = $product->variations[0]->weight;
             foreach ( $product->variations as $vvalue ) {
                 $quantity += $vvalue->quantity;
             }
+            if(isset($product->variations[0]->weight)){
+                $weight = $product->variations[0]->weight;
+                $temp['weight']     = $weight;
+            }
             $temp['price']      = $market_price;
             $temp['quantity']   = $quantity;
-            $temp['weight']     = $weight;
             if( $quantity > 0 ){
                 $temp['stock_status_id'] = '7';
             }else{
