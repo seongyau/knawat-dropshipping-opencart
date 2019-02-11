@@ -211,6 +211,7 @@ class KnawatImporter{
             }
 
             $this->params['batch_done'] = true;
+            $this->log->write($data);
             return $data;
 
         }else{
