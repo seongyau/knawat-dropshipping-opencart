@@ -640,12 +640,15 @@ class KnawatImporter{
                 curl_setopt( $ch, CURLOPT_BINARYTRANSFER,1 );
                 curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 0 );
                 curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0 );
+                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+                curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
                 // curl_setopt( $ch, CURLOPT_PROXY, "192.168.10.5:8080" ); // for local USE only remove it please
                 $raw_image_data = curl_exec( $ch );
                 curl_close ( $ch );
 
                 try{
-                    $image = fopen( $full_image_path,'w' );
+                    $newFileName = strtok($full_image_path, "?");
+                    $image = fopen( $newFileName,'w' );
                     fwrite( $image, $raw_image_data );
                     fclose( $image );
 
