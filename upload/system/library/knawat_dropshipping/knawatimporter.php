@@ -555,6 +555,24 @@ class KnawatImporter{
             }
             $temp['product_option'] = $this->model_extension_module_knawat_dropshipping->parse_product_options( $product->variations, $price,$update );
         }
+        if(!empty($temp['product_option'])){
+            foreach ($temp['product_option'] as $key) {
+                $i = 0;
+                    if(isset($key['product_option_value'])){
+                        $j = count($key['product_option_value']);
+                    }else{
+                        $j = 0;
+                    }
+                    foreach ($key['product_option_value'] as $value) {
+                        if($value['quantity'] == 0){
+                            $i++;
+                        }
+                    }
+                }
+                if($i == $j){
+                    $temp['stock_status_id'] = '5';
+                }
+        }
         if(empty($temp['product_option']) && !$update){
             return false;
         }
