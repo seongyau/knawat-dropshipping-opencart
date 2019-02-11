@@ -308,7 +308,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		}
 		/*cron url*/
 		$randomNumber = $this->generateRandomString();
-		$data['cron_url'] = dirname(HTTP_SERVER)."?route=extension/module/knawat_cron/importProducts&access_token=$randomNumber";
+		$data['cron_url'] = dirname(HTTP_SERVER)."/?route=extension/module/knawat_cron/importProducts&access_token=$randomNumber";
 		/*cron url*/
 		/*added for lower version*/
 		if(version_compare(VERSION, '3.0.0','<') ) {
