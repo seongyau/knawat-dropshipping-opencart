@@ -377,7 +377,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		$customer_id = $token_array[1];
 		$order_add = $token_array[2];
 
-		if( empty( $order_id ) || empty( $customer_id ) || empty( $order_add ) ){
+		if( empty( $order_id ) || (empty( $customer_id ) && $customer_id != 0) || empty( $order_add ) ){
 			echo $this->language->get( 'error_wrong' );
 			exit;
 		}
