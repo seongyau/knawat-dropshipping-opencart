@@ -65,11 +65,13 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 
 		$order_status = $this->model_extension_module_knawat_dropshipping->get_order_status_name( $order_status_id );
 		if( $order_status != '' ){
+			if($order_status == 'Canceled'){
+				$order_status = 'Cancelled'
+			}
 			$order['order_status'] = $order_status;
 		}
 		
 		$mp_order = $this->format_order( $order, $order_products, $is_update );
-
 		if( empty( $mp_order ) ){
 			$this->log->write("Failed to format Order as per MP API at send order to knawat.com, format_order() failed. order_id:" . $order_id);
 			return false;

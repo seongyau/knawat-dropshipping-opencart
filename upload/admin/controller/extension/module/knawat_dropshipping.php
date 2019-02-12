@@ -506,8 +506,6 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
         				$this->model_extension_module_knawat_dropshipping->update_knawat_meta( $order_id, 'shipment_tracking_number', $shipment_tracking_number, 'order' );
         			}
         		}
-        		$this->log->write("page");
-        		$this->log->write($item['page']);
         	}
         }
 
