@@ -211,7 +211,16 @@ class KnawatImporter{
             }
 
             $this->params['batch_done'] = true;
-            $this->log->write($data);
+            if(isset($data['failed'])){
+                $this->log->write("Failed Products : ".count($data['failed']));
+            }
+            if(!empty($data['imported'])){
+                $this->log->write("Imported Products : ".count($data['imported']));
+            }
+            if(!empty($data['updated'])){
+               $this->log->write("Updated Products : ".count($data['updated']));
+            }
+            $this->log->write(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Batch completed<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
             return $data;
 
         }else{
@@ -226,6 +235,21 @@ class KnawatImporter{
     public function import_product( $product, $force_update = false ){
 
         if( empty( $product ) || !isset( $product->sku ) || !isset($product->variations[0]->sale_price) ){
+            if(isset($product->sku)){
+                $errorSku = $product->sku;
+            }
+            if(empty($product) && isset($product->sku)){
+                $this->log->write("Product Failed , Product data is empty , Sku : ".$errorSku);
+            }
+            if(empty($product) && !isset($product->sku)) {
+                $this->log->write("Product Failed , Product data is empty and sku not found");
+            }
+            if(!isset($product->sku)){
+                $this->log->write("Product Failed , It's sku not found");   
+            }
+            if(!isset($product->variations[0]->sale_price) && isset($product->sku)){
+                $this->log->write("Product Failed , It's sale price is not available , Sku : ".$errorSku);   
+            }
             return false;
         }
 
@@ -575,7 +599,8 @@ class KnawatImporter{
                 }
         }
         if(empty($temp['product_option']) && !$update){
-            return false;
+             $this->log->write("Product Failed , It's variations not available or available with zero quantity, Sku : ".$temp['sku']);
+                return false;
         }
         ///////////////////////////////////
         /////// @TODO Custom Fields ///////
