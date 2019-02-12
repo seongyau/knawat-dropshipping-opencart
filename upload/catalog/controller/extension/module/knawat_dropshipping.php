@@ -66,7 +66,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		$order_status = $this->model_extension_module_knawat_dropshipping->get_order_status_name( $order_status_id );
 		if( $order_status != '' ){
 			if($order_status == 'Canceled'){
-				$order_status = 'Cancelled'
+				$order_status = 'Cancelled';
 			}
 			$order['order_status'] = $order_status;
 		}
