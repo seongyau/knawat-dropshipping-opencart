@@ -83,7 +83,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		if( $is_update ){
 			$failed = false;
 			$failed_message = 'Something went wrong during order update to knawat.com';
-			$whilelisted_status = [ 'Pending', 'Processing', 'Canceled' ];
+			$whilelisted_status = [ 'Pending', 'Processing', 'Cancelled' ];
 			if (!in_array($order_status, $whilelisted_status)) {
                     return false;
                 }
