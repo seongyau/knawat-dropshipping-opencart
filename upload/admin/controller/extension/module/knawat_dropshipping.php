@@ -402,7 +402,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 
 		$knawatimporter = new KnawatImporter( $this->registry, $item );
 
-		$import_data = $knawatimporter->import();
+		$import_data = $knawatimporter->import(true);
 		
 		$params = $knawatimporter->get_import_params();
 

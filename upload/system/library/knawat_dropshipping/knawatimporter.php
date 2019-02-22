@@ -104,7 +104,7 @@ class KnawatImporter{
     /** 
      *  Main import function.
      */
-    public function import(){
+    public function import($manual_import = false){
         //error_reporting(0);
         $this->start_time = time();
         $data             = array(
@@ -131,7 +131,7 @@ class KnawatImporter{
         switch ( $this->import_type ) {
             case 'full':
             $lastUpdated = $this->model_extension_module_knawat_dropshipping->get_knawat_meta('8159', 'time','knawat_last_imported');
-            if (empty($lastUpdated)) {
+            if (empty($lastUpdated) || isset($manual_import)) {
                 $lastUpdated = 0;
             }
             $productdata = $this->mp_api->get( 'catalog/products/?limit='.$this->params['limit'].'&page='.$this->params['page']. '&lastupdate='.$lastUpdated );
