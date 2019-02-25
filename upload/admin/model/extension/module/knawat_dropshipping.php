@@ -370,7 +370,7 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
                         foreach ( $variation->attributes as $attribute ) {
                         $attribute_names = (array) $attribute->name;
                         $attribute_options = (array) $attribute->option;
-                        $option_name = array_key_exists( $this->default_language, $attribute_names ) ? $attribute_names[$this->default_language] : (isset($attribute_names['en'])) ? $attribute_names['en'] : '';
+                        $option_name = array_key_exists( $this->default_language, $attribute_names ) ? $attribute_names[$this->default_language] : (isset($attribute_names['en']) ? $attribute_names['en'] : '');
                         if(array_key_exists( $this->default_language, $attribute_options )){
                             $option_value_name = $attribute_options[$this->default_language];
                         }else if(!empty($attribute_options['en'])){
