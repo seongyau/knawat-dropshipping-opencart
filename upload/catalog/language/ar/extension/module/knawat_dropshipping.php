@@ -26,4 +26,8 @@ $_['column_price']               = 'سعر الوحدة';
 
 // Error
 $_['error_order_id']             = 'رقم الطلب إجباري';
+$_['error_order_notfound']       = 'الطلب المطلوب غير متوفر';
 $_['error_wrong']                = 'حدث خطأ ما أثناء الطلب، يرجى المحاولة مرة أخرى';
+
+// Warning
+$_['warning_apikey_needed']         = 'يجب أدخال Consumer Key و Consumer Secret للحصول على توكين قنوات.';

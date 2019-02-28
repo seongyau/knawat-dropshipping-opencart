@@ -29,7 +29,7 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
     }
 
     public function install(){
-        // create knawat metadata table into database.
+        // create Knawat metadata table into database.
         $query = $this->db->query("CREATE TABLE IF NOT EXISTS `".DB_PREFIX."knawat_metadata` (
             `meta_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
             `resource_id` bigint(20) unsigned NOT NULL DEFAULT '0',
@@ -80,7 +80,7 @@ class ModelExtensionModuleKnawatDropshipping extends Model {
     public function add_knawat_meta( $resource_id, $meta_key, $meta_value = '', $resource_type = 'product' ) {
         $insert_sql = "INSERT INTO `" . DB_PREFIX . "knawat_metadata` (`resource_id`, `resource_type`, `meta_key`, `meta_value`) VALUES (".(int)$resource_id.", '".$this->db->escape($resource_type)."', '".$this->db->escape($meta_key)."', '".$this->db->escape($meta_value)."');";
         $result = $this->db->query( $insert_sql );
-        // Last instered ID.
+        // Last inserted ID.
         $meta_id = $this->db->getLastId();
         if( $meta_id > 0 ){
             return true;

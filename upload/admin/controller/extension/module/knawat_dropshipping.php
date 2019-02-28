@@ -104,7 +104,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		}
 	}
 
-	// Enabled & Disable ingnore for now.
+	// Enabled & Disable ignore for now.
 	/* public function enabled() {
 		$this->load->model('setting/event');
 		$events = $this->model_extension_event->getEvents();
@@ -166,7 +166,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 			$this->response->redirect($this->url->link( $this->route, $tokenField.'=' . $this->session->data[$tokenField] . '&type=module', true));
 		}
 
-		// Load Laguage strings
+		// Load Language strings
 		$data = array(
 			'entry_consumer_key' 			=> $this->language->get('entry_consumer_key'),
 			'consumer_key_placeholder' 		=> $this->language->get('consumer_key_placeholder'),

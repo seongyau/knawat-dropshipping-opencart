@@ -17,9 +17,9 @@ $_['text_run_import']		      = 'Run Import';
 $_['text_ordersync_botton']		  = 'Sync Them Now';
 $_['text_syncing']		          = 'Synchronizing...';
 $_['text_connected']		      = 'Connected';
-$_['text_connected_desc']		  = 'Your store is connected with knawat.com';
+$_['text_connected_desc']		  = 'Your store is connected with Knawat.com';
 $_['text_notconnected']		      = 'Not connected';
-$_['text_notconnected_desc']	  = 'Your store is not connected with knawat.com. Please enter valid API keys and press save button to refresh connection';
+$_['text_notconnected_desc']	  = 'Your store is not connected with Knawat.com. Please enter valid API keys and press save button to refresh connection';
 $_['text_knawat_menu']            = 'Knawat Dropshipping';
 $_['text_import_note']            = 'Note';
 $_['cronjob']                     = 'Cron Job Integration';
@@ -44,16 +44,16 @@ $_['entry_connection']              = 'Connection Status';
 
 // Warning
 $_['warning_ajaximport']            = '<strong>Warning:</strong> Please do not close browser window until product import finish!';
-$_['warning_ordersync']             = '<strong>Warning:</strong> Some of your orders has been not synced with knawat.com.';
-$_['warning_apikey_needed']         = 'Consumer Key and Consumer Secret needed for get knawat access token.';
+$_['warning_ordersync']             = '<strong>Warning:</strong> Some of your orders has been not synced with Knawat.com.';
+$_['warning_apikey_needed']         = 'Consumer Key and Consumer Secret needed for get Knawat access token.';
 $_['text_cron_sync_error']          = '<strong>Warning:</strong> Knawat products not syncing automatically, you need to setup your';
 
 // Error
-$_['error_permission'] 		= 'Warning: You do not have permission to modify knawat dropshipping module!';
+$_['error_permission'] 		= 'Warning: You do not have permission to modify Knawat dropshipping module!';
 $_['error_status'] 	        = 'Warning: You must set status!';
-$_['error_ajaximport'] 	    = '<strong>Error:</strong> Something went wrong durring import. Please try again';
+$_['error_ajaximport'] 	    = '<strong>Error:</strong> Something went wrong during import. Please try again';
 $_['error_wrong'] 	        = '<strong>Error:</strong> Something went wrong. Please try again';
 
 // Success
 $_['success_ajaximport'] 	= '<strong>Success:</strong> Products are imported successfully.';
-$_['success_ordersync'] 	= '<strong>Success:</strong> Order(s) has been syncronized successfully.';
+$_['success_ordersync'] 	= '<strong>Success:</strong> Order(s) has been synchronized successfully.';

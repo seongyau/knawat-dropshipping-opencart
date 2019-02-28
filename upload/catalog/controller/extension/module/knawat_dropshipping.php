@@ -35,12 +35,12 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		$order_products = $this->model_account_order->getOrderProducts($order_id);
 
 		if (!$order) {
-			$this->log->write("Failed to load Order at send order to knawat.com, getOrder() failed. order_id:" . $order_id);
+			$this->log->write("Failed to load Order at send order to Knawat.com, getOrder() failed. order_id:" . $order_id);
 			return false;
 		}
 
 		if (!$order_products) {
-			$this->log->write("Failed to load Order Products at send order to knawat.com, getOrderProducts() failed. order_id:" . $order_id);
+			$this->log->write("Failed to load Order Products at send order to Knawat.com, getOrderProducts() failed. order_id:" . $order_id);
 			return false;
 		}
 
@@ -73,7 +73,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		
 		$mp_order = $this->format_order( $order, $order_products, $is_update );
 		if( empty( $mp_order ) ){
-			$this->log->write("Failed to format Order as per MP API at send order to knawat.com, format_order() failed. order_id:" . $order_id);
+			$this->log->write("Failed to format Order as per MP API at send order to Knawat.com, format_order() failed. order_id:" . $order_id);
 			return false;
 		}
 
@@ -82,7 +82,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 
 		if( $is_update ){
 			$failed = false;
-			$failed_message = 'Something went wrong during order update to knawat.com';
+			$failed_message = 'Something went wrong during order update to Knawat.com';
 			$whilelisted_status = [ 'Pending', 'Processing', 'Cancelled' ];
 			if (!in_array($order_status, $whilelisted_status)) {
                     return false;
@@ -107,7 +107,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 			}
 		}else{
 			$failed = false;
-			$failed_message = 'Something went wrong during order create on knawat.com';
+			$failed_message = 'Something went wrong during order create on Knawat.com';
 			$push_status = 'Processing';
 			if ($push_status != $order_status) {
 				return false;
@@ -214,7 +214,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 	}
 
 	/**
-	 * format product into knawat's order product
+	 * format product into Knawat's order product
 	 */
 	private function get_knawat_order_product( $order_products, $is_update = false ){
 
@@ -258,7 +258,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 	}
 
 	/**
-	 * Load knawat dropshipping admin model
+	 * Load Knawat dropshipping admin model
 	 */
 	private function load_admin_model(){
 		// Load.
@@ -268,7 +268,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 	}
 
 	/**
-	 * is it knawat's Product?
+	 * is it Knawat's Product?
 	 */
 	private function is_knawat_product( $order_product ){
 		if( !empty( $order_product ) ){
@@ -292,7 +292,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 	}
 
 	/**
-	 * order has knawat's products?
+	 * order has Knawat's products?
 	 */
 	private function order_has_knawat_product( $order_products ){
 		if( empty( $order_products ) ){
@@ -341,7 +341,7 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 	}
 
 	/**
-	 * update product stock and price from knawat.com
+	 * update product stock and price from Knawat.com
 	 */
 	public function sync_product_by_id(){
 		/** 
