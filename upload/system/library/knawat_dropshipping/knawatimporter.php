@@ -696,5 +696,5 @@ class KnawatImporter{
     public function get_import_params(){
         return $this->params;
     }
-
 }
+
