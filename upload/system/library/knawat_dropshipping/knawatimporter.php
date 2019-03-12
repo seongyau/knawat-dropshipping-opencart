@@ -131,7 +131,7 @@ class KnawatImporter{
         switch ( $this->import_type ) {
             case 'full':
             $lastUpdated = $this->model_extension_module_knawat_dropshipping->get_knawat_meta('8159', 'time','knawat_last_imported');
-            if (empty($lastUpdated) || $manual_import) {
+            if (empty($lastUpdated) || isset($manual_import) === false ) {
                 $lastUpdated = 0;
             }
             $productdata = $this->mp_api->get( 'catalog/products/?limit='.$this->params['limit'].'&page='.$this->params['page']. '&lastupdate='.$lastUpdated );
