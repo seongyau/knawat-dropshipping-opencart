@@ -130,29 +130,29 @@ class KnawatImporter{
 
         switch ( $this->import_type ) {
             case 'full':
-            $lastUpdated = $this->model_extension_module_knawat_dropshipping->get_knawat_meta('8159', 'time','knawat_last_imported');
-            if (empty($lastUpdated) || isset($manual_import) === false ) {
-                $lastUpdated = 0;
-            }
-            $productdata = $this->mp_api->get( 'catalog/products/?limit='.$this->params['limit'].'&page='.$this->params['page']. '&lastupdate='.$lastUpdated );
-            break;
+                $lastUpdated = $this->model_extension_module_knawat_dropshipping->get_knawat_meta('8159', 'time','knawat_last_imported');
+                if (empty($lastUpdated) || $manual_import) {  // Manual import = 1 -- (from import button)
+                    $lastUpdated = 0;
+                }
+                $productdata = $this->mp_api->get( 'catalog/products/?limit='.$this->params['limit'].'&page='.$this->params['page']. '&lastupdate='.$lastUpdated );
+                break;
 
             case 'single':
-            $product_sku = '';
-            $product_id = $this->params['product_id'];
-            if( $product_id != '' ){
-                $tempproduct = $this->model_catalog_product->getProduct( $product_id );
-                $product_sku = isset( $tempproduct['sku'] ) ? $tempproduct['sku'] : '';
-                if( empty( $product_sku ) ){
-                    $product_sku = isset( $tempproduct['model'] ) ? $tempproduct['model'] : '';
+                $product_sku = '';
+                $product_id = $this->params['product_id'];
+                if( $product_id != '' ){
+                    $tempproduct = $this->model_catalog_product->getProduct( $product_id );
+                    $product_sku = isset( $tempproduct['sku'] ) ? $tempproduct['sku'] : '';
+                    if( empty( $product_sku ) ){
+                        $product_sku = isset( $tempproduct['model'] ) ? $tempproduct['model'] : '';
+                    }
                 }
-            }
-            if( empty( $product_sku ) ){
-                return array( 'status' => 'fail', 'message' => 'Please provide product sku.' );
-            }
-                // API Wrapper class here.
-            $productdata = $this->mp_api->get( 'catalog/products/'. $product_sku );
-            break;
+                if( empty( $product_sku ) ){
+                    return array( 'status' => 'fail', 'message' => 'Please provide product sku.' );
+                }
+                    // API Wrapper class here.
+                $productdata = $this->mp_api->get( 'catalog/products/'. $product_sku );
+                break;
 
             default:
             break;
