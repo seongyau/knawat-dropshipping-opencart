@@ -661,10 +661,12 @@ class ControllerExtensionModuleKnawatDropshipping extends Controller {
 		$csrf_token = $_SESSION['csrf_token'];
 		unset( $_SESSION['csrf_token'] );
 
-		$headers = apache_request_headers();
-		if( !isset( $headers['CsrfToken'] ) || $headers['CsrfToken'] != $csrf_token ){
-			exit( json_encode( array( 'error' => 'invalid_CSRF_token' ) ) );
-		}
+        if( !function_exists('apache_request_headers') ) {
+            $headers = apache_request_headers();
+            if( !isset( $headers['CsrfToken'] ) || $headers['CsrfToken'] != $csrf_token ){
+                exit( json_encode( array( 'error' => 'invalid_CSRF_token' ) ) );
+            }
+        }
 		/* if (isset($_SERVER['HTTP_REFERER'])) {
 			$server_name = $_SERVER['SERVER_NAME'];
 			if ( false !== stripos( $_SERVER['HTTP_REFERER'], $server_name ) ) {
