@@ -19,7 +19,6 @@ class KnawatOCHandshake
      */
     public function __construct($registry)
     {
-
         $this->registry = $registry;
 
         if (false !== stripos(DIR_APPLICATION, 'admin')) {
@@ -92,13 +91,6 @@ class KnawatOCHandshake
      * Check Last sync Date
      */
     public function getLastSyncDate(){
-//        $get_sql = "SELECT * FROM `" . DB_PREFIX . "knawat_metadata` WHERE `resource_type` = 'knawat_last_imported' LIMIT 1";
-//        $result = $this->db->query( $get_sql );
-//        if( isset( $result->num_rows ) && $result->num_rows > 0 && !empty( $result->rows ) ){
-//            $timestamp = gmdate("F j, Y, g:i a T", $result->rows[0]['meta_value']);  // convert unix timestamp
-//            $this->log->write($timestamp);
-//        }
-
         $last_import_time = $this->model_extension_module_knawat_dropshipping->get_knawat_meta('8159', 'time', 'knawat_last_imported' );
         $timestamp = gmdate("F j, Y, g:i a T", $last_import_time);  // convert unix timestamp
         $this->log->write('Last sync Date: ' . $timestamp);
