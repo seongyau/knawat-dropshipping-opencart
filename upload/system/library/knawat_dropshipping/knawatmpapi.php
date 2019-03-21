@@ -8,7 +8,7 @@
  * @author 	   Dharmesh Patel
  */
 
- class KnawatMPAPI{
+class KnawatMPAPI{
 
     private $registry;
     /**
@@ -382,5 +382,4 @@
         }
         return $this->ch;
     }
-
  }
