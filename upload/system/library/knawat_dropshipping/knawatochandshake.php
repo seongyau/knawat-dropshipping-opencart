@@ -60,19 +60,16 @@ class KnawatOCHandshake
     public function getOCVersion()
     {
         if (version_compare(VERSION, '3.0.0', '<')) {
-            $this->log->write(VERSION);
-        } else {
-            $this->log->write(VERSION);
+            return VERSION;
         }
+        return VERSION;
     }
 
     /**
      * Get Knawat plugin version
      */
 //    public function getKnawatPluginVersion()
-//    {
-//        //
-//    }
+//    {}
 
     /**
      * Check Knawat is connected
@@ -81,9 +78,10 @@ class KnawatOCHandshake
     {
         $is_valid = $this->config->get('module_knawat_dropshipping_valid_token');
         if ($is_valid == '1') {
-            $this->log->write('Is connected with Knawat.com');
+            $this->log->write("Is connected with Knawat.com");
+            return 'Is connected with Knawat.com';
         } else {
-            $this->log->write('Not connected with Knawat.com');
+            return 'Not connected with Knawat.com';
         }
     }
 
@@ -93,7 +91,7 @@ class KnawatOCHandshake
     public function getLastSyncDate(){
         $last_import_time = $this->model_extension_module_knawat_dropshipping->get_knawat_meta('8159', 'time', 'knawat_last_imported' );
         $timestamp = gmdate("F j, Y, g:i a T", $last_import_time);  // convert unix timestamp
-        $this->log->write('Last sync Date: ' . $timestamp);
+        return 'Last sync Date: ' . $timestamp;
     }
 
     /**
@@ -105,10 +103,10 @@ class KnawatOCHandshake
         $current_time = time();
         $difference = $current_time - (int)$oldTime;
         if($difference > 10800){
-            $this->log->write('Cron is not configured');
+            return 'Cron is not configured';
         }
         else{
-            $this->log->write('Cron is configured');
+            return 'Cron is configured';
         }
     }
 
@@ -119,10 +117,9 @@ class KnawatOCHandshake
      */
     public function knawatValidate($consumer_key, $consumer_secret ){
         if( !empty( $consumer_key ) && !empty( $consumer_key ) ){
-            $this->log->write('key: ' . $consumer_key);
-            $this->log->write('secret: ' . $consumer_secret);
+            return 'key: ' . $consumer_key . ' && ' .'secret: ' . $consumer_secret;
         }else{
-            $this->log->write( $this->language->get('warning_apikey_needed') );
+            return 'Error Comsumer key needed' );
         }
     }
 }
